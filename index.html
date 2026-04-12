@@ -84,7 +84,7 @@ const NOW=new Date();
 const TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
 const TOMORROW=new Date(TODAY); TOMORROW.setDate(TODAY.getDate()+1);
 const nextMonth=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,1);
-document.getElementById('tgl').textContent='Jadwal Vendor · '+DAYS[TODAY.getDay()]+', '+TODAY.getDate()+' '+MONTHS_ID[TODAY.getMonth()]+' '+TODAY.getFullYear();
+document.getElementById('tgl').textContent='Jadwal Vendor · Hari ini '+DAYS[TODAY.getDay()]+', '+TODAY.getDate()+' '+MONTHS_ID[TODAY.getMonth()]+' '+TODAY.getFullYear();
 document.getElementById('tab3').childNodes[0].textContent=MONTHS_ID[nextMonth.getMonth()]+' '+nextMonth.getFullYear()+'  ';
 const URL_HARI='https://docs.google.com/spreadsheets/d/e/2PACX-1vQQML2dVfvtdjphB4a55qpbeq6BQH85qgKn-XRbar0zp8CTqWKU1xwsdj77Xf2LiugnSquQKaKGD57U/pub?gid=1523652542&single=true&output=csv';
 const URL_ROM='https://docs.google.com/spreadsheets/d/e/2PACX-1vQQML2dVfvtdjphB4a55qpbeq6BQH85qgKn-XRbar0zp8CTqWKU1xwsdj77Xf2LiugnSquQKaKGD57U/pub?gid=154444950&single=true&output=csv';
