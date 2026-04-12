@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="UPT Probolinggo">
+<title>UPT Probolinggo — Pihak Luar</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F4F4F4;min-height:100vh}
+.app{max-width:430px;margin:0 auto;min-height:100vh;background:#F4F4F4}
+.topbar{background:#1A1A2E;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top))}
+.topbar h1{color:#fff;font-size:15px;font-weight:600}
+.topbar p{color:rgba(255,255,255,0.55);font-size:12px;margin-top:2px}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #E0E0E0;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:10}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:11px 14px;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;color:#999;border-bottom:3px solid transparent;margin-bottom:-2px;flex-shrink:0;transition:all 0.15s}
+.tab.active{color:#fff;background:#E67E22;border-bottom:3px solid #C0620F}
+.tab:not(.active):hover{color:#444;background:#F5F5F5}
+.cnt{display:inline-flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.18);color:#fff;font-size:10px;font-weight:500;border-radius:20px;padding:1px 6px;margin-left:5px}
+.tab:not(.active) .cnt{background:#E67E22;color:#fff}
+.content{padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.panel{display:none}
+.panel.active{display:block}
+.card{background:#fff;border:0.5px solid #E0E0E0;border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.aset{font-size:13px;font-weight:600;color:#1A1A2E;flex:1;line-height:1.3}
+.teg{font-size:11px;font-weight:500;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.teg-500{background:#FEF3C7;color:#92400E}
+.teg-150{background:#EDE9FE;color:#5B21B6}
+.teg-20{background:#D1FAE5;color:#065F46}
+.uraian{font-size:12px;color:#555;line-height:1.5;margin-bottom:10px}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mi{background:#F8F8F8;border-radius:8px;padding:6px 8px}
+.ml{font-size:10px;color:#999;margin-bottom:1px}
+.mv{font-size:12px;font-weight:500;color:#222}
+.ultg{display:inline-flex;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-top:8px}
+.u-p{background:#FEE2E2;color:#991B1B}
+.u-b{background:#DBEAFE;color:#1E40AF}
+.u-j{background:#D1FAE5;color:#065F46}
+.empty{text-align:center;padding:32px 20px;color:#aaa;font-size:13px;font-style:italic;background:#fff;border-radius:12px;border:0.5px solid #E0E0E0}
+.loading{text-align:center;padding:40px 20px;color:#aaa;font-size:13px}
+.loading::after{content:'';display:block;width:24px;height:24px;border:2px solid #E0E0E0;border-top-color:#E67E22;border-radius:50%;margin:12px auto 0;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{text-align:center;padding:24px;color:#c0392b;font-size:12px;background:#fff;border-radius:12px;border:0.5px solid #E0E0E0;line-height:1.6}
+.refresh-btn{display:block;margin:12px auto 0;padding:8px 20px;background:#1A1A2E;color:#fff;border:none;border-radius:20px;font-size:12px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <h1>UPT Probolinggo — Pihak Luar</h1>
+    <p id="tgl"></p>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="sw(0)">Hari Ini<span class="cnt" id="c0">...</span></div>
+    <div class="tab" onclick="sw(1)">Besok<span class="cnt" id="c1">...</span></div>
+    <div class="tab" onclick="sw(2)">ROM Final<span class="cnt" id="c2">...</span></div>
+    <div class="tab" onclick="sw(3)" id="tab3">Bulan Depan<span class="cnt" id="c3">...</span></div>
+  </div>
+  <div class="content">
+    <div class="panel active" id="p0"><div class="loading">Memuat data</div></div>
+    <div class="panel" id="p1"><div class="loading">Memuat data</div></div>
+    <div class="panel" id="p2"><div class="loading">Memuat data</div></div>
+    <div class="panel" id="p3"><div class="loading">Memuat data</div></div>
+  </div>
+</div>
+
+<script>
+const DAYS=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const MONTHS_ID=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const MN={Januari:0,Februari:1,Maret:2,April:3,Mei:4,Juni:5,Juli:6,Agustus:7,September:8,Oktober:9,November:10,Desember:11};
+
+const NOW=new Date();
+const TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+const TOMORROW=new Date(TODAY); TOMORROW.setDate(TODAY.getDate()+1);
+const nextMonth=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,1);
+
+document.getElementById('tgl').textContent=DAYS[TODAY.getDay()]+', '+TODAY.getDate()+' '+MONTHS_ID[TODAY.getMonth()]+' '+TODAY.getFullYear();
+document.getElementById('tab3').childNodes[0].textContent=MONTHS_ID[nextMonth.getMonth()]+' '+nextMonth.getFullYear()+'  ';
+
+const URL_HARI ='https://docs.google.com/spreadsheets/d/e/2PACX-1vQQML2dVfvtdjphB4a55qpbeq6BQH85qgKn-XRbar0zp8CTqWKU1xwsdj77Xf2LiugnSquQKaKGD57U/pub?gid=1523652542&single=true&output=csv';
+const URL_ROM  ='https://docs.google.com/spreadsheets/d/e/2PACX-1vQQML2dVfvtdjphB4a55qpbeq6BQH85qgKn-XRbar0zp8CTqWKU1xwsdj77Xf2LiugnSquQKaKGD57U/pub?gid=154444950&single=true&output=csv';
+const URL_BULAN='https://docs.google.com/spreadsheets/d/e/2PACX-1vQQML2dVfvtdjphB4a55qpbeq6BQH85qgKn-XRbar0zp8CTqWKU1xwsdj77Xf2LiugnSquQKaKGD57U/pub?gid=493383156&single=true&output=csv';
+
+function parseCSV(text){
+  const lines=text.trim().split('\n');
+  return lines.map(line=>{
+    const cols=[];let cur='',inQ=false;
+    for(let i=0;i<line.length;i++){
+      if(line[i]==='"'){inQ=!inQ;}
+      else if(line[i]===','&&!inQ){cols.push(cur.trim());cur='';}
+      else cur+=line[i];
+    }
+    cols.push(cur.trim());
+    return cols;
+  });
+}
+
+function parseDate(s){
+  if(!s) return null;
+  const clean=s.replace(/^[^,]+,\s*/,'').trim();
+  const p=clean.split(' ');
+  if(p.length<3) return null;
+  const m=MN[p[1]];
+  if(m===undefined) return null;
+  return new Date(parseInt(p[2]),m,parseInt(p[0]));
+}
+
+function isActive(awal,akhir,target){
+  const d1=parseDate(awal),d2=parseDate(akhir);
+  if(!d1||!d2) return false;
+  return d1<=target&&d2>=target;
+}
+
+function tegClass(t){
+  const n=parseInt(t);
+  return n>=500?'teg-500':n>=150?'teg-150':'teg-20';
+}
+
+function ultgClass(u){
+  if(!u) return 'u-p';
+  u=u.toUpperCase();
+  return u.includes('PROBOLINGGO')?'u-p':u.includes('BANGIL')?'u-b':'u-j';
+}
+
+function cardHTML(r){
+  const awal=r[4]||'', akhir=r[5]||'';
+  return`<div class="card">
+    <div class="card-top">
+      <div class="aset">${r[0]||''}</div>
+      <span class="teg ${tegClass(r[2])}">${r[2]||''} kV</span>
+    </div>
+    <div class="uraian">${r[1]||''}</div>
+    <div class="meta">
+      <div class="mi"><div class="ml">Peralatan Padam</div><div class="mv">${r[3]||''}</div></div>
+      <div class="mi"><div class="ml">Pukul</div><div class="mv">${r[6]||''}</div></div>
+      <div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">${awal.replace(/^[^,]+,\s*/,'')}</div></div>
+      <div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">${akhir.replace(/^[^,]+,\s*/,'')}</div></div>
+    </div>
+    <span class="ultg ${ultgClass(r[7])}">${r[7]||''}</span>
+  </div>`;
+}
+
+function renderPanel(id,rows,emptyMsg,cntId){
+  document.getElementById(cntId).textContent=rows.length;
+  document.getElementById(id).innerHTML=rows.length?rows.map(cardHTML).join(''):`<div class="empty">${emptyMsg}</div>`;
+}
+
+async function fetchCSV(url){
+  const res=await fetch(url);
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return parseCSV(await res.text());
+}
+
+async function loadAll(){
+  try{
+    const [hariData,romData,bulanData]=await Promise.all([
+      fetchCSV(URL_HARI),
+      fetchCSV(URL_ROM),
+      fetchCSV(URL_BULAN)
+    ]);
+
+    // Sheet Hari Ini & Besok: data mulai baris 7 (index 6)
+    const allHari=hariData.slice(6).filter(r=>r[0]&&r[0].trim()!='');
+    const todayRows=allHari.filter(r=>isActive(r[4],r[5],TODAY));
+    const tomorrowRows=allHari.filter(r=>isActive(r[4],r[5],TOMORROW));
+    renderPanel('p0',todayRows,'Tidak ada pekerjaan hari ini','c0');
+    renderPanel('p1',tomorrowRows,'Tidak ada pekerjaan besok','c1');
+
+    // ROM Final: data mulai baris 6 (index 5)
+    const romRows=romData.slice(5).filter(r=>r[0]&&r[0].trim()!='');
+    renderPanel('p2',romRows,'Tidak ada data ROM Final','c2');
+
+    // Bulan Depan: data mulai baris 6 (index 5)
+    const bulanRows=bulanData.slice(5).filter(r=>r[0]&&r[0].trim()!='');
+    renderPanel('p3',bulanRows,'Tidak ada data bulan depan','c3');
+
+  } catch(e){
+    ['p0','p1','p2','p3'].forEach(id=>{
+      document.getElementById(id).innerHTML=`<div class="err">
+        Gagal memuat data.<br>Pastikan koneksi internet aktif.<br><small>${e.message}</small>
+        <button class="refresh-btn" onclick="location.reload()">Coba Lagi</button>
+      </div>`;
+    });
+    ['c0','c1','c2','c3'].forEach(id=>document.getElementById(id).textContent='!');
+  }
+}
+
+function sw(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i==j));
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i==j));
+}
+
+loadAll();
+</script>
+</body>
+</html>
