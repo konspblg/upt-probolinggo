@@ -82,6 +82,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .btn-mitigasi.empty{border-color:#E0E0E0;color:#BBBBBB;cursor:default}
 .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:6px}
 .card-footer-left{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+
+.filter-bar{background:#fff;border-bottom:1px solid #E8EEF8;padding:10px 12px;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto}
+.filter-select{font-size:12px;font-weight:500;color:#1565C0;border:1.5px solid #90CAF9;border-radius:8px;padding:6px 8px;background:#EEF4FF;appearance:none;-webkit-appearance:none;outline:none;min-width:0;flex:1}
+.filter-select.active{background:#1565C0;color:#fff;border-color:#1565C0}
+.filter-date{font-size:12px;font-weight:500;color:#1565C0;border:1.5px solid #90CAF9;border-radius:8px;padding:6px 8px;background:#EEF4FF;outline:none;min-width:0;flex:1}
+.filter-date.active{background:#1565C0;color:#fff;border-color:#1565C0}
+.filter-clear{font-size:12px;font-weight:600;color:#fff;background:#E53935;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.filter-clear:disabled{background:#E0E0E0;color:#aaa;cursor:default}
 .fab-up{position:fixed;bottom:72px;right:12px;width:30px;height:30px;background:#1565C0;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:199;opacity:0;transition:opacity 0.25s;box-shadow:0 2px 6px rgba(21,101,192,0.4)}
 .fab-up.visible{opacity:1}
 .fab-up svg{width:14px;height:14px;fill:#fff}
@@ -96,7 +104,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
   <div class="content">
     <div class="panel active" id="p0"><div class="loading">Memuat data</div></div>
     <div class="panel" id="p1"><div class="loading">Memuat data</div></div>
-    <div class="panel" id="p2"><div class="loading">Memuat data</div></div>
+    <div class="panel" id="p2">
+      <div class="filter-bar" id="romFilterBar">
+        <select class="filter-select" id="romFilterUltg" onchange="applyRomFilter()">
+          <option value="">Semua ULTG</option>
+          <option value="PROBOLINGGO">Probolinggo</option>
+          <option value="BANGIL">Bangil</option>
+          <option value="JEMBER">Jember</option>
+        </select>
+        <input type="date" class="filter-date" id="romFilterDate" onchange="applyRomFilter()">
+        <button class="filter-clear" id="romClearBtn" onclick="clearRomFilter()" disabled>Hapus</button>
+      </div>
+      <div id="romContent"><div class="loading">Memuat data</div></div>
+    </div>
     <div class="panel" id="p3">
       <div class="month-bar">
         <label>Bulan</label>
@@ -108,6 +128,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
           <option value="5" selected>Mei 2026</option>
         </select>
         <span class="month-count" id="monthCount"></span>
+      </div>
+      <div class="filter-bar" id="robFilterBar">
+        <select class="filter-select" id="robFilterUltg" onchange="applyRobFilter()">
+          <option value="">Semua ULTG</option>
+          <option value="PROBOLINGGO">Probolinggo</option>
+          <option value="BANGIL">Bangil</option>
+          <option value="JEMBER">Jember</option>
+        </select>
+        <input type="date" class="filter-date" id="robFilterDate" onchange="applyRobFilter()">
+        <button class="filter-clear" id="robClearBtn" onclick="clearRobFilter()" disabled>Hapus</button>
       </div>
       <div style="padding:12px 0 0" id="monthContent"><div class="loading">Memuat data</div></div>
     </div>
@@ -241,25 +271,65 @@ function cardHTMLRom(r,hl){
     </div>
   </div>`;
 }
+let romAllRows=[];
+
 function renderRomPanel(rows){
-  if(!rows.length){document.getElementById('p2').innerHTML='<div class="empty">Tidak ada data</div>';document.getElementById('c2').textContent=0;return;}
-  document.getElementById('c2').textContent=rows.length;
-  const luar=rows.filter(r=>(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
-  const bukan=rows.filter(r=>!(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
-  // Sort luar: mulai hari ini duluan
+  romAllRows=rows;
+  applyRomFilter();
+}
+
+function applyRomFilter(){
+  const ultg=document.getElementById('romFilterUltg').value;
+  const dateVal=document.getElementById('romFilterDate').value;
+  const clearBtn=document.getElementById('romClearBtn');
+
+  let filtered=romAllRows;
+  if(ultg) filtered=filtered.filter(r=>(r[13]||'').toUpperCase().includes(ultg));
+  if(dateVal){
+    // dateVal = "2026-04-17", konversi ke object Date
+    const [y,m,d]=dateVal.split('-');
+    const target=new Date(parseInt(y),parseInt(m)-1,parseInt(d));
+    filtered=filtered.filter(r=>{
+      const d1=parseDate(r[7]);
+      return d1&&d1.getTime()===target.getTime();
+    });
+  }
+
+  const hasFilter=ultg||dateVal;
+  clearBtn.disabled=!hasFilter;
+  document.getElementById('romFilterUltg').classList.toggle('active',!!ultg);
+  document.getElementById('romFilterDate').classList.toggle('active',!!dateVal);
+
+  const content=document.getElementById('romContent');
+  document.getElementById('c2').textContent=filtered.length;
+
+  if(!filtered.length){
+    content.innerHTML='<div class="empty" style="margin:12px">Tidak ada data sesuai filter</div>';
+    return;
+  }
+
+  const luar=filtered.filter(r=>(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
+  const bukan=filtered.filter(r=>!(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
   const luarHl=luar.filter(r=>isTodayStart(r[7]));
   const luarRest=luar.filter(r=>!isTodayStart(r[7]));
-  let html='';
+  let html='<div style="padding:12px 12px 0">';
   if(luar.length){
-    html+=divider(`Pihak Luar (${luar.length})`, 'teal');
+    html+=divider(`Pihak Luar (${luar.length})`,'teal');
     if(luarHl.length) html+=luarHl.map(r=>cardHTMLRom(r,true)).join('');
     html+=luarRest.map(r=>cardHTMLRom(r,false)).join('');
   }
   if(bukan.length){
-    html+=divider(`Lainnya (${bukan.length})`, 'gray');
+    html+=divider(`Lainnya (${bukan.length})`,'gray');
     html+=bukan.map(r=>cardHTMLRom(r,false)).join('');
   }
-  document.getElementById('p2').innerHTML=html;
+  html+='</div>';
+  content.innerHTML=html;
+}
+
+function clearRomFilter(){
+  document.getElementById('romFilterUltg').value='';
+  document.getElementById('romFilterDate').value='';
+  applyRomFilter();
 }
 function renderPanel(id,rows,emptyMsg,cntId){
   document.getElementById(cntId).textContent=rows.length;
@@ -276,6 +346,11 @@ async function loadMonth(){
   const month=document.getElementById('monthSelect').value;
   const content=document.getElementById('monthContent');
   const countEl=document.getElementById('monthCount');
+  // Reset filter saat ganti bulan
+  document.getElementById('robFilterUltg').value='';
+  document.getElementById('robFilterDate').value='';
+  document.getElementById('robClearBtn').disabled=true;
+  robAllRows=[];
   if(monthCache[month]){renderMonthData(monthCache[month],countEl,content);return;}
   content.innerHTML='<div class="loading">Memuat data</div>';
   countEl.textContent='';
@@ -288,11 +363,50 @@ async function loadMonth(){
     content.innerHTML=`<div class="err">Gagal memuat data.<br><small>${e.message}</small><br><button class="retry-btn" onclick="loadMonth()">Coba Lagi</button></div>`;
   }
 }
+let robAllRows=[];
+
 function renderMonthData(rows,countEl,content){
+  robAllRows=rows;
   countEl.textContent=rows.length+' pekerjaan';
   document.getElementById('c3').textContent=rows.length;
-  if(!rows.length){content.innerHTML='<div class="empty">Tidak ada data</div>';return;}
-  content.innerHTML=rows.map(r=>cardHTMLRom(r,false)).join('');
+  applyRobFilter();
+}
+
+function applyRobFilter(){
+  if(!robAllRows.length) return;
+  const ultg=document.getElementById('robFilterUltg').value;
+  const dateVal=document.getElementById('robFilterDate').value;
+  const clearBtn=document.getElementById('robClearBtn');
+
+  let filtered=robAllRows;
+  if(ultg) filtered=filtered.filter(r=>(r[13]||'').toUpperCase().includes(ultg));
+  if(dateVal){
+    const [y,m,d]=dateVal.split('-');
+    const target=new Date(parseInt(y),parseInt(m)-1,parseInt(d));
+    filtered=filtered.filter(r=>{
+      const d1=parseDate(r[7]);
+      return d1&&d1.getTime()===target.getTime();
+    });
+  }
+
+  const hasFilter=ultg||dateVal;
+  clearBtn.disabled=!hasFilter;
+  document.getElementById('robFilterUltg').classList.toggle('active',!!ultg);
+  document.getElementById('robFilterDate').classList.toggle('active',!!dateVal);
+
+  document.getElementById('c3').textContent=filtered.length;
+  const content=document.getElementById('monthContent');
+  if(!filtered.length){
+    content.innerHTML='<div class="empty" style="margin-top:12px">Tidak ada data sesuai filter</div>';
+    return;
+  }
+  content.innerHTML=filtered.map(r=>cardHTMLRom(r,false)).join('');
+}
+
+function clearRobFilter(){
+  document.getElementById('robFilterUltg').value='';
+  document.getElementById('robFilterDate').value='';
+  applyRobFilter();
 }
 async function loadAll(){
   try{
