@@ -78,7 +78,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .popup-title{font-size:13px;font-weight:600;color:#1A1A2E;margin-bottom:10px;padding-right:8px}
 .popup-body{font-size:12px;color:#444;line-height:1.7}
 .popup-body p{margin-bottom:6px}
-.btn-mitigasi{background:none;border:1px solid #BBDEFB;border-radius:50%;color:#1565C0;font-size:11px;font-weight:700;width:22px;height:22px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:6px;flex-shrink:0;vertical-align:middle;padding:0}
+.btn-mitigasi{background:none;border:1px solid #BBDEFB;border-radius:50%;color:#1565C0;font-size:11px;font-weight:700;width:22px;height:22px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;float:right}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:6px}
+.card-footer-left{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .fab-up{position:fixed;bottom:72px;right:12px;width:30px;height:30px;background:#1565C0;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:199;opacity:0;transition:opacity 0.25s;box-shadow:0 2px 6px rgba(21,101,192,0.4)}
 .fab-up.visible{opacity:1}
 .fab-up svg{width:14px;height:14px;fill:#fff}
@@ -194,7 +196,6 @@ function divider(label, style){
 }
 function cardHTML(r,hl,showPj){
   const awal=r[4]||'',akhir=r[5]||'';
-  const pj=showPj&&r[6]?`<span class="pj-badge ${pjClass(r[6])}">${r[6]}</span>`:'';
   const badge=hl?'<span class="today-badge">Mulai Hari Ini</span>':'';
   return`<div class="card${hl?' highlight':''}">
     <div class="card-top"><div class="aset">${r[0]||''}</div><span class="teg ${tegClass(r[2])}">${r[2]||''} kV</span></div>
@@ -205,7 +206,13 @@ function cardHTML(r,hl,showPj){
       <div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">${awal.replace(/^[^,]+,\s*/,'')}</div></div>
       <div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">${akhir.replace(/^[^,]+,\s*/,'')}</div></div>
     </div>
-    <span class="ultg ${ultgClass(r[7])}">${r[7]||''}</span>${badge}
+    <div class="card-footer">
+      <div class="card-footer-left">
+        <span class="ultg ${ultgClass(r[8])}">${r[8]||'—'}</span>
+        ${badge}
+      </div>
+      <button class="btn-mitigasi" onclick="showMitigasi('${esc(r[0])}','${esc(r[7]||'')}')">?</button>
+    </div>
   </div>`;
 }
 function esc(s){return (s||'').replace(/'/g,"\\'")}
@@ -214,9 +221,8 @@ function cardHTMLRom(r,hl){
   const pj=r[6]||'';
   const mitigasi=r[11]||'';
   const badge=hl?'<span class="today-badge">Mulai Hari Ini</span>':'';
-  const btnMitigasi=mitigasi?`<button class="btn-mitigasi" onclick="showMitigasi('${esc(r[1])}','${esc(mitigasi)}')">?</button>`:'';
   return`<div class="card${hl?' highlight':''}">
-    <div class="card-top"><div class="aset">${r[1]||''}</div><span class="teg ${tegClass(r[3])}">${r[3]||''} kV</span>${btnMitigasi}</div>
+    <div class="card-top"><div class="aset">${r[1]||''}</div><span class="teg ${tegClass(r[3])}">${r[3]||''} kV</span></div>
     <div class="uraian">${r[2]||''}</div>
     <div class="meta">
       <div class="mi"><div class="ml">Peralatan Padam</div><div class="mv">${r[4]||''}</div></div>
@@ -224,9 +230,14 @@ function cardHTMLRom(r,hl){
       <div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">${awal.replace(/^[^,]+,\s*/,'')}</div></div>
       <div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">${akhir.replace(/^[^,]+,\s*/,'')}</div></div>
     </div>
-    <span class="ultg ${ultgClass(r[13])}">${r[13]||''}</span>
-    ${pj?`<span class="pj-badge ${pjClass(pj)}">${pj}</span>`:''}
-    ${badge}
+    <div class="card-footer">
+      <div class="card-footer-left">
+        <span class="ultg ${ultgClass(r[13])}">${r[13]||'—'}</span>
+        ${pj?`<span class="pj-badge ${pjClass(pj)}">${pj}</span>`:''}
+        ${badge}
+      </div>
+      <button class="btn-mitigasi" onclick="showMitigasi('${esc(r[1])}','${esc(mitigasi)}')">?</button>
+    </div>
   </div>`;
 }
 function renderRomPanel(rows){
