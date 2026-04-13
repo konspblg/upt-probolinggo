@@ -214,7 +214,7 @@ function cardHTMLRom(r,hl){
   const pj=r[6]||'';
   const mitigasi=r[11]||'';
   const badge=hl?'<span class="today-badge">Mulai Hari Ini</span>':'';
-  const btnMitigasi=mitigasi?`<button class="btn-mitigasi" onclick="showMitigasi('${esc(r[1])}','${esc(mitigasi)}')">? Mitigasi</button>`:'';
+  const btnMitigasi=mitigasi?`<button class="btn-mitigasi" onclick="showMitigasi('${esc(r[1])}','${esc(mitigasi)}')">?</button>`:'';
   return`<div class="card${hl?' highlight':''}">
     <div class="card-top"><div class="aset">${r[1]||''}</div><span class="teg ${tegClass(r[3])}">${r[3]||''} kV</span>${btnMitigasi}</div>
     <div class="uraian">${r[2]||''}</div>
