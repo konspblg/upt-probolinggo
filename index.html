@@ -300,8 +300,10 @@ function applyRomFilter(){
   clearBtn.disabled=!hasFilter;
   document.getElementById('romFilterUltg').classList.toggle('active',!!ultg);
   const romLbl=document.getElementById('romDateDisplay');
-  if(dateVal){const[y,mo,d]=dateVal.split('-');romLbl.textContent=d+'/'+mo+'/'+y;romLbl.style.background='#1565C0';romLbl.style.color='#fff';romLbl.style.borderColor='#1565C0';}
-  else{romLbl.textContent='Pilih Tanggal';romLbl.style.background='#EEF4FF';romLbl.style.color='#1565C0';romLbl.style.borderColor='#90CAF9';}
+  if(romLbl){
+    if(dateVal){const[y,mo,d]=dateVal.split('-');romLbl.textContent=d+'/'+mo+'/'+y;romLbl.style.background='#1565C0';romLbl.style.color='#fff';romLbl.style.borderColor='#1565C0';}
+    else{romLbl.textContent='Pilih Tanggal';romLbl.style.background='#EEF4FF';romLbl.style.color='#1565C0';romLbl.style.borderColor='#90CAF9';}
+  }
 
   const content=document.getElementById('romContent');
   document.getElementById('c2').textContent=filtered.length;
@@ -396,8 +398,10 @@ function applyRobFilter(){
   clearBtn.disabled=!hasFilter;
   document.getElementById('robFilterUltg').classList.toggle('active',!!ultg);
   const robLbl=document.getElementById('robDateDisplay');
-  if(dateVal){const[y,mo,d]=dateVal.split('-');robLbl.textContent=d+'/'+mo+'/'+y;robLbl.style.background='#1565C0';robLbl.style.color='#fff';robLbl.style.borderColor='#1565C0';}
-  else{robLbl.textContent='Pilih Tanggal';robLbl.style.background='#EEF4FF';robLbl.style.color='#1565C0';robLbl.style.borderColor='#90CAF9';}
+  if(robLbl){
+    if(dateVal){const[y,mo,d]=dateVal.split('-');robLbl.textContent=d+'/'+mo+'/'+y;robLbl.style.background='#1565C0';robLbl.style.color='#fff';robLbl.style.borderColor='#1565C0';}
+    else{robLbl.textContent='Pilih Tanggal';robLbl.style.background='#EEF4FF';robLbl.style.color='#1565C0';robLbl.style.borderColor='#90CAF9';}
+  }
 
   document.getElementById('c3').textContent=filtered.length;
   const content=document.getElementById('monthContent');
