@@ -70,6 +70,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err{text-align:center;padding:24px;color:#c0392b;font-size:12px;background:#fff;border-radius:12px;border:0.5px solid #FFCDD2;line-height:1.6}
 .retry-btn{display:inline-block;margin-top:10px;padding:8px 20px;background:#1565C0;color:#fff;border:none;border-radius:20px;font-size:12px;cursor:pointer}
+
+.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:flex-end;justify-content:center}
+.popup-box{background:#fff;border-radius:16px 16px 0 0;padding:20px 16px;width:100%;max-height:70vh;overflow-y:auto;position:relative}
+.popup-title{font-size:13px;font-weight:600;color:#1A1A2E;margin-bottom:10px}
+.popup-body{font-size:12px;color:#444;line-height:1.7;white-space:pre-wrap}
+.popup-close{position:absolute;top:14px;right:14px;background:#F0F0F0;border:none;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555}
+.btn-mitigasi{background:none;border:1px solid #BBDEFB;border-radius:20px;color:#1565C0;font-size:11px;font-weight:500;padding:3px 10px;cursor:pointer;margin-top:8px;margin-left:6px}
 .fab-up{position:fixed;bottom:72px;right:12px;width:30px;height:30px;background:#1565C0;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:199;opacity:0;transition:opacity 0.25s;box-shadow:0 2px 6px rgba(21,101,192,0.4)}
 .fab-up.visible{opacity:1}
 .fab-up svg{width:14px;height:14px;fill:#fff}
@@ -132,16 +139,22 @@ const URLS={
   5:BASE+'?gid=283699977&single=true&output=csv',
 };
 function parseCSV(text){
-  return text.trim().split('\n').map(line=>{
-    const cols=[];let cur='',inQ=false;
-    for(let i=0;i<line.length;i++){
-      if(line[i]==='"'){inQ=!inQ;}
-      else if(line[i]===','&&!inQ){cols.push(cur.trim());cur='';}
-      else cur+=line[i];
+  const rows=[];const lines=text.split('\n');let i=0;
+  while(i<lines.length){
+    const cols=[];let cur='',inQ=false,line=lines[i];
+    outer:while(true){
+      for(let j=0;j<line.length;j++){
+        const ch=line[j];
+        if(ch==='"'){if(inQ&&line[j+1]==='"'){cur+='"';j++;}else inQ=!inQ;}
+        else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}
+        else cur+=ch;
+      }
+      if(!inQ)break;
+      i++;if(i>=lines.length)break;cur+=' ';line=lines[i];
     }
-    cols.push(cur.trim());
-    return cols;
-  });
+    cols.push(cur.trim());rows.push(cols);i++;
+  }
+  return rows;
 }
 function parseDate(s){
   if(!s) return null;
@@ -193,22 +206,25 @@ function cardHTML(r,hl,showPj){
     <span class="ultg ${ultgClass(r[7])}">${r[7]||''}</span>${badge}
   </div>`;
 }
+function esc(s){return (s||'').replace(/'/g,"\\'")}
 function cardHTMLRom(r,hl){
-  const awal=r[4]||'',akhir=r[5]||'';
+  const awal=r[7]||'',akhir=r[8]||'';
   const pj=r[6]||'';
+  const mitigasi=r[11]||'';
   const badge=hl?'<span class="today-badge">Mulai Hari Ini</span>':'';
+  const btnMitigasi=mitigasi?`<button class="btn-mitigasi" onclick="showMitigasi('${esc(r[1])}','${esc(mitigasi)}')">? Mitigasi</button>`:'';
   return`<div class="card${hl?' highlight':''}">
     <div class="card-top"><div class="aset">${r[1]||''}</div><span class="teg ${tegClass(r[3])}">${r[3]||''} kV</span></div>
     <div class="uraian">${r[2]||''}</div>
     <div class="meta">
       <div class="mi"><div class="ml">Peralatan Padam</div><div class="mv">${r[4]||''}</div></div>
       <div class="mi"><div class="ml">Pukul</div><div class="mv">${r[9]||''}</div></div>
-      <div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">${r[7]?r[7].replace(/^[^,]+,\s*/,''):''}</div></div>
-      <div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">${r[8]?r[8].replace(/^[^,]+,\s*/,''):''}</div></div>
+      <div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">${awal.replace(/^[^,]+,\s*/,'')}</div></div>
+      <div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">${akhir.replace(/^[^,]+,\s*/,'')}</div></div>
     </div>
     <span class="ultg ${ultgClass(r[13])}">${r[13]||''}</span>
     ${pj?`<span class="pj-badge ${pjClass(pj)}">${pj}</span>`:''}
-    ${badge}
+    ${badge}${btnMitigasi}
   </div>`;
 }
 function renderRomPanel(rows){
@@ -278,6 +294,15 @@ async function loadAll(){
   }
   loadMonth();
 }
+
+function showMitigasi(aset, mitigasi){
+  document.getElementById('mitigasiTitle').textContent='Mitigasi Sistem — '+aset;
+  document.getElementById('mitigasiBody').textContent=mitigasi||'Tidak ada informasi mitigasi.';
+  document.getElementById('mitigasiOverlay').style.display='flex';
+}
+function closeMitigasi(){
+  document.getElementById('mitigasiOverlay').style.display='none';
+}
 function sw(i){
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i==j));
   document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i==j));
@@ -288,5 +313,13 @@ document.getElementById('scrollWrap').addEventListener('scroll',function(){
 });
 loadAll();
 </script>
+
+<div class="popup-overlay" id="mitigasiOverlay" style="display:none" onclick="if(event.target===this)closeMitigasi()">
+  <div class="popup-box">
+    <button class="popup-close" onclick="closeMitigasi()">✕</button>
+    <div class="popup-title" id="mitigasiTitle"></div>
+    <div class="popup-body" id="mitigasiBody"></div>
+  </div>
+</div>
 </body>
 </html>
