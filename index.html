@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="id">
 <head>
 <meta charset="UTF-8">
@@ -11,20 +10,36 @@
 <title>UPT Probolinggo — Jadwal Vendor</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F0F4FF;min-height:100vh;padding-bottom:80px}
-.topbar{background:#1A1A2E;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));position:sticky;top:0;z-index:100}
+html,body{height:100%;background:#1A1A2E}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+
+/* TOPBAR sticky + z-index tinggi + background solid */
+.topbar{background:#1A1A2E;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));position:fixed;top:0;left:0;right:0;z-index:200}
 .topbar h1{color:#fff;font-size:15px;font-weight:600}
 .topbar p{color:rgba(255,255,255,0.5);font-size:11px;margin-top:3px}
-.content{padding:12px;background:#F0F4FF}
+
+/* Konten scroll di bawah header */
+.scroll-wrap{position:fixed;top:0;left:0;right:0;bottom:62px;overflow-y:auto;background:#F0F4FF;padding-top:62px}
+.content{padding:12px;min-height:100%}
+
 .panel{display:none}
 .panel.active{display:block}
-.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;display:flex;border-top:1.5px solid #E0E0E0;padding-bottom:max(0px,env(safe-area-inset-bottom))}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 10px;cursor:pointer;transition:all 0.15s;color:#999;font-size:12px;font-weight:500;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-1.5px}
+
+/* DROPDOWN BULAN */
+.month-bar{background:#fff;border-bottom:1px solid #E8EEF8;padding:10px 12px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+.month-bar label{font-size:12px;font-weight:500;color:#555;white-space:nowrap}
+.month-select{flex:1;font-size:13px;font-weight:500;color:#1565C0;border:1.5px solid #90CAF9;border-radius:8px;padding:7px 10px;background:#EEF4FF;appearance:none;-webkit-appearance:none;outline:none}
+.month-count{font-size:11px;color:#90A4AE;white-space:nowrap}
+
+/* BOTTOM NAV */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:#fff;display:flex;border-top:1.5px solid #E0E0E0;padding-bottom:max(0px,env(safe-area-inset-bottom))}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;cursor:pointer;transition:all 0.15s;color:#999;font-size:12px;font-weight:500;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-1.5px}
 .tab.active{color:#1565C0;border-bottom:3px solid #1565C0;background:#EEF4FF}
-.tab:not(.active):active{background:#F5F5F5}
 .cnt{display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border-radius:20px;padding:1px 6px;margin-left:4px;vertical-align:middle}
 .tab:not(.active) .cnt{background:#E0E0E0;color:#888}
 .tab.active .cnt{background:#1565C0;color:#fff}
+
+/* CARDS */
 .card{background:#fff;border:0.5px solid #DDEEFF;border-radius:12px;padding:12px 14px;margin-bottom:8px}
 .card.highlight{background:#E6F7F5;border:1.5px solid #4DB6AC}
 .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
@@ -43,52 +58,92 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .u-p{background:#FEE2E2;color:#991B1B}
 .u-b{background:#DBEAFE;color:#1E40AF}
 .u-j{background:#D1FAE5;color:#065F46}
+.pj-badge{display:inline-flex;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-top:8px;margin-left:6px}
+.pj-luar{background:#FEF3C7;color:#92400E}
+.pj-upt{background:#F0F4FF;color:#1565C0}
+.pj-other{background:#F3F4F6;color:#555}
 .today-badge{display:inline-flex;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:8px;margin-left:6px;background:#00897B;color:#fff}
+.sec-label{font-size:11px;font-weight:600;color:#00897B;text-transform:uppercase;letter-spacing:0.5px;margin:4px 0 10px 2px}
+
 .empty{text-align:center;padding:32px 20px;color:#aaa;font-size:13px;font-style:italic;background:#fff;border-radius:12px;border:0.5px solid #DDEEFF}
 .loading{text-align:center;padding:40px 20px;color:#90A4AE;font-size:13px}
 .loading::after{content:'';display:block;width:24px;height:24px;border:2px solid #DDEEFF;border-top-color:#1565C0;border-radius:50%;margin:12px auto 0;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err{text-align:center;padding:24px;color:#c0392b;font-size:12px;background:#fff;border-radius:12px;border:0.5px solid #FFCDD2;line-height:1.6}
 .retry-btn{display:inline-block;margin-top:10px;padding:8px 20px;background:#1565C0;color:#fff;border:none;border-radius:20px;font-size:12px;cursor:pointer}
-.sec-label{font-size:11px;font-weight:600;color:#00897B;text-transform:uppercase;letter-spacing:0.5px;margin:4px 0 10px 2px}
-.fab-up{position:fixed;bottom:76px;right:16px;width:40px;height:40px;background:#1565C0;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:99;opacity:0;transition:opacity 0.25s;box-shadow:0 2px 8px rgba(21,101,192,0.4)}
+
+/* FAB UP — lebih kecil */
+.fab-up{position:fixed;bottom:72px;right:12px;width:30px;height:30px;background:#1565C0;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:199;opacity:0;transition:opacity 0.25s;box-shadow:0 2px 6px rgba(21,101,192,0.4)}
 .fab-up.visible{opacity:1}
-.fab-up svg{width:18px;height:18px;fill:#fff}
+.fab-up svg{width:14px;height:14px;fill:#fff}
 </style>
 </head>
 <body>
+
 <div class="topbar">
   <h1>UPT Probolinggo</h1>
   <p id="tgl"></p>
 </div>
-<div class="content">
-  <div class="panel active" id="p0"><div class="loading">Memuat data</div></div>
-  <div class="panel" id="p1"><div class="loading">Memuat data</div></div>
-  <div class="panel" id="p2"><div class="loading">Memuat data</div></div>
-  <div class="panel" id="p3"><div class="loading">Memuat data</div></div>
+
+<div class="scroll-wrap" id="scrollWrap">
+  <div class="content">
+    <div class="panel active" id="p0"><div class="loading">Memuat data</div></div>
+    <div class="panel" id="p1"><div class="loading">Memuat data</div></div>
+    <div class="panel" id="p2"><div class="loading">Memuat data</div></div>
+    <div class="panel" id="p3">
+      <div class="month-bar">
+        <label>Bulan</label>
+        <select class="month-select" id="monthSelect" onchange="loadMonth()">
+          <option value="1">Januari 2026</option>
+          <option value="2">Februari 2026</option>
+          <option value="3">Maret 2026</option>
+          <option value="4">April 2026</option>
+          <option value="5" selected>Mei 2026</option>
+        </select>
+        <span class="month-count" id="monthCount"></span>
+      </div>
+      <div style="padding:12px 0 0" id="monthContent"><div class="loading">Memuat data</div></div>
+    </div>
+  </div>
 </div>
+
 <nav class="bottomnav">
   <div class="tab active" onclick="sw(0)">Hari Ini<span class="cnt" id="c0">...</span></div>
   <div class="tab" onclick="sw(1)">Besok<span class="cnt" id="c1">...</span></div>
   <div class="tab" onclick="sw(2)">ROM Final<span class="cnt" id="c2">...</span></div>
-  <div class="tab" onclick="sw(3)" id="tab3">Bulan Depan<span class="cnt" id="c3">...</span></div>
+  <div class="tab" onclick="sw(3)" id="tab3">ROB<span class="cnt" id="c3">...</span></div>
 </nav>
-<button class="fab-up" id="fabUp" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+
+<button class="fab-up" id="fabUp" onclick="document.getElementById('scrollWrap').scrollTo({top:0,behavior:'smooth'})">
   <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
 </button>
+
 <script>
 const DAYS=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 const MONTHS_ID=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const MN={Januari:0,Februari:1,Maret:2,April:3,Mei:4,Juni:5,Juli:6,Agustus:7,September:8,Oktober:9,November:10,Desember:11};
+
 const NOW=new Date();
 const TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
 const TOMORROW=new Date(TODAY); TOMORROW.setDate(TODAY.getDate()+1);
-const nextMonth=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,1);
+
 document.getElementById('tgl').textContent='Jadwal Vendor · Hari ini '+DAYS[TODAY.getDay()]+', '+TODAY.getDate()+' '+MONTHS_ID[TODAY.getMonth()]+' '+TODAY.getFullYear();
-document.getElementById('tab3').childNodes[0].textContent=MONTHS_ID[nextMonth.getMonth()]+' '+nextMonth.getFullYear()+'  ';
-const URL_HARI='https://docs.google.com/spreadsheets/d/e/2PACX-1vQQML2dVfvtdjphB4a55qpbeq6BQH85qgKn-XRbar0zp8CTqWKU1xwsdj77Xf2LiugnSquQKaKGD57U/pub?gid=1523652542&single=true&output=csv';
-const URL_ROM='https://docs.google.com/spreadsheets/d/e/2PACX-1vQQML2dVfvtdjphB4a55qpbeq6BQH85qgKn-XRbar0zp8CTqWKU1xwsdj77Xf2LiugnSquQKaKGD57U/pub?gid=154444950&single=true&output=csv';
-const URL_BULAN='https://docs.google.com/spreadsheets/d/e/2PACX-1vQQML2dVfvtdjphB4a55qpbeq6BQH85qgKn-XRbar0zp8CTqWKU1xwsdj77Xf2LiugnSquQKaKGD57U/pub?gid=493383156&single=true&output=csv';
+
+const sel=document.getElementById('monthSelect');
+const defaultMonth=Math.min(NOW.getMonth()+2,5);
+if(sel.querySelector(`option[value="${defaultMonth}"]`)) sel.value=defaultMonth;
+
+const BASE='https://docs.google.com/spreadsheets/d/e/2PACX-1vQQML2dVfvtdjphB4a55qpbeq6BQH85qgKn-XRbar0zp8CTqWKU1xwsdj77Xf2LiugnSquQKaKGD57U/pub';
+const URLS={
+  hari:BASE+'?gid=1523652542&single=true&output=csv',
+  rom: BASE+'?gid=154444950&single=true&output=csv',
+  1:   BASE+'?gid=1965474605&single=true&output=csv',
+  2:   BASE+'?gid=1435750602&single=true&output=csv',
+  3:   BASE+'?gid=1823378795&single=true&output=csv',
+  4:   BASE+'?gid=1580327448&single=true&output=csv',
+  5:   BASE+'?gid=283699977&single=true&output=csv',
+};
+
 function parseCSV(text){
   return text.trim().split('\n').map(line=>{
     const cols=[];let cur='',inQ=false;
@@ -101,6 +156,7 @@ function parseCSV(text){
     return cols;
   });
 }
+
 function parseDate(s){
   if(!s) return null;
   const p=s.replace(/^[^,]+,\s*/,'').trim().split(' ');
@@ -109,22 +165,33 @@ function parseDate(s){
   if(m===undefined) return null;
   return new Date(parseInt(p[2]),m,parseInt(p[0]));
 }
+
 function isActive(awal,akhir,target){
   const d1=parseDate(awal),d2=parseDate(akhir);
   if(!d1||!d2) return false;
   return d1<=target&&d2>=target;
 }
+
 function isTodayStart(awal){
   const d1=parseDate(awal);
   if(!d1) return false;
   return d1.getTime()===TODAY.getTime();
 }
+
 function tegClass(t){const n=parseInt(t);return n>=500?'teg-500':n>=150?'teg-150':'teg-20';}
 function ultgClass(u){
   if(!u) return 'u-p';
   u=u.toUpperCase();
   return u.includes('PROBOLINGGO')?'u-p':u.includes('BANGIL')?'u-b':'u-j';
 }
+function pjClass(p){
+  if(!p) return 'pj-other';
+  p=p.toUpperCase();
+  if(p.includes('PIHAK LUAR')) return 'pj-luar';
+  if(p.includes('UPT')||p.includes('UP2')) return 'pj-upt';
+  return 'pj-other';
+}
+
 function cardHTML(r,hl){
   const awal=r[4]||'',akhir=r[5]||'';
   const badge=hl?'<span class="today-badge">Mulai Hari Ini</span>':'';
@@ -140,6 +207,27 @@ function cardHTML(r,hl){
     <span class="ultg ${ultgClass(r[7])}">${r[7]||''}</span>${badge}
   </div>`;
 }
+
+function cardHTMLFull(r){
+  const awal=r[7]||'',akhir=r[8]||'';
+  const pj=r[6]||'';
+  const hl=isTodayStart(awal);
+  const badge=hl?'<span class="today-badge">Mulai Hari Ini</span>':'';
+  return`<div class="card${hl?' highlight':''}">
+    <div class="card-top"><div class="aset">${r[1]||''}</div><span class="teg ${tegClass(r[3])}">${r[3]||''} kV</span></div>
+    <div class="uraian">${r[2]||''}</div>
+    <div class="meta">
+      <div class="mi"><div class="ml">Peralatan Padam</div><div class="mv">${r[4]||''}</div></div>
+      <div class="mi"><div class="ml">Pukul</div><div class="mv">${r[9]||''}</div></div>
+      <div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">${awal.replace(/^[^,]+,\s*/,'')}</div></div>
+      <div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">${akhir.replace(/^[^,]+,\s*/,'')}</div></div>
+    </div>
+    <span class="ultg ${ultgClass(r[13])}">${r[13]||''}</span>
+    ${pj?`<span class="pj-badge ${pjClass(pj)}">${pj}</span>`:''}
+    ${badge}
+  </div>`;
+}
+
 function renderPanel(id,rows,emptyMsg,cntId,isRom){
   document.getElementById(cntId).textContent=rows.length;
   if(!rows.length){document.getElementById(id).innerHTML=`<div class="empty">${emptyMsg}</div>`;return;}
@@ -154,26 +242,69 @@ function renderPanel(id,rows,emptyMsg,cntId,isRom){
     document.getElementById(id).innerHTML=rows.map(r=>cardHTML(r,false)).join('');
   }
 }
-async function fetchCSV(url){const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);return parseCSV(await res.text());}
+
+async function fetchCSV(url){
+  const res=await fetch(url);
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return parseCSV(await res.text());
+}
+
+const monthCache={};
+
+async function loadMonth(){
+  const month=document.getElementById('monthSelect').value;
+  const content=document.getElementById('monthContent');
+  const countEl=document.getElementById('monthCount');
+
+  if(monthCache[month]){
+    renderMonthData(monthCache[month],countEl,content);
+    return;
+  }
+
+  content.innerHTML='<div class="loading">Memuat data</div>';
+  countEl.textContent='';
+
+  try{
+    const data=await fetchCSV(URLS[month]);
+    const rows=data.slice(5).filter(r=>r[1]&&r[1].trim()!='');
+    monthCache[month]=rows;
+    renderMonthData(rows,countEl,content);
+  }catch(e){
+    content.innerHTML=`<div class="err">Gagal memuat data.<br><small>${e.message}</small><br><button class="retry-btn" onclick="loadMonth()">Coba Lagi</button></div>`;
+  }
+}
+
+function renderMonthData(rows,countEl,content){
+  countEl.textContent=rows.length+' pekerjaan';
+  document.getElementById('c3').textContent=rows.length;
+  if(!rows.length){content.innerHTML='<div class="empty">Tidak ada data</div>';return;}
+  content.innerHTML=rows.map(cardHTMLFull).join('');
+}
+
 async function loadAll(){
   try{
-    const [hariData,romData,bulanData]=await Promise.all([fetchCSV(URL_HARI),fetchCSV(URL_ROM),fetchCSV(URL_BULAN)]);
+    const [hariData,romData]=await Promise.all([fetchCSV(URLS.hari),fetchCSV(URLS.rom)]);
     const allHari=hariData.slice(6).filter(r=>r[0]&&r[0].trim()!='');
     renderPanel('p0',allHari.filter(r=>isActive(r[4],r[5],TODAY)),'Tidak ada pekerjaan hari ini','c0',false);
     renderPanel('p1',allHari.filter(r=>isActive(r[4],r[5],TOMORROW)),'Tidak ada pekerjaan besok','c1',false);
     renderPanel('p2',romData.slice(5).filter(r=>r[0]&&r[0].trim()!=''),'Tidak ada data ROM Final','c2',true);
-    renderPanel('p3',bulanData.slice(5).filter(r=>r[0]&&r[0].trim()!=''),'Tidak ada data bulan depan','c3',false);
   }catch(e){
-    ['p0','p1','p2','p3'].forEach(id=>{document.getElementById(id).innerHTML=`<div class="err">Gagal memuat data.<br><small>${e.message}</small><br><button class="retry-btn" onclick="location.reload()">Coba Lagi</button></div>`;});
-    ['c0','c1','c2','c3'].forEach(id=>document.getElementById(id).textContent='!');
+    ['p0','p1','p2'].forEach(id=>{document.getElementById(id).innerHTML=`<div class="err">Gagal memuat data.<br><small>${e.message}</small><br><button class="retry-btn" onclick="location.reload()">Coba Lagi</button></div>`;});
+    ['c0','c1','c2'].forEach(id=>document.getElementById(id).textContent='!');
   }
+  loadMonth();
 }
+
 function sw(i){
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i==j));
   document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i==j));
-  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('scrollWrap').scrollTo({top:0,behavior:'smooth'});
 }
-window.addEventListener('scroll',()=>document.getElementById('fabUp').classList.toggle('visible',window.scrollY>200));
+
+document.getElementById('scrollWrap').addEventListener('scroll',function(){
+  document.getElementById('fabUp').classList.toggle('visible',this.scrollTop>200);
+});
+
 loadAll();
 </script>
 </body>
