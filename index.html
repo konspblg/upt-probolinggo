@@ -257,7 +257,7 @@ function divider(label, style){
 }
 function cardHTML(r,hl,showPj){
   const awal=r[4]||'',akhir=r[5]||'';
-  const badge=hl?'<span class="today-badge">Mulai Hari Ini</span>':'';
+  const badge=hl?'<span class="today-badge">Berlangsung Hari Ini</span>':'';
   return`<div class="card${hl?' highlight':''}">
     <div class="card-top"><div class="aset">${r[0]||''}</div><span class="teg ${tegClass(r[2])}">${r[2]||''} kV</span></div>
     <div class="uraian">${r[1]||''}</div>
@@ -281,7 +281,7 @@ function cardHTMLRom(r,hl){
   const awal=r[7]||'',akhir=r[8]||'';
   const pj=r[6]||'';
   const mitigasi=r[11]||'';
-  const badge=hl?'<span class="today-badge">Mulai Hari Ini</span>':'';
+  const badge=hl?'<span class="today-badge">Berlangsung Hari Ini</span>':'';
   return`<div class="card${hl?' highlight':''}">
     <div class="card-top"><div class="aset">${r[1]||''}</div><span class="teg ${tegClass(r[3])}">${r[3]||''} kV</span></div>
     <div class="uraian">${r[2]||''}</div>
@@ -345,8 +345,8 @@ function applyRomFilter(){
 
   const luar=filtered.filter(r=>(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
   const bukan=filtered.filter(r=>!(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
-  const luarHl=luar.filter(r=>isTodayStart(r[7]));
-  const luarRest=luar.filter(r=>!isTodayStart(r[7]));
+  const luarHl=luar.filter(r=>isActive(r[7],r[8],TODAY));
+  const luarRest=luar.filter(r=>!isActive(r[7],r[8],TODAY));
   let html='<div style="padding:12px 12px 0">';
   if(luar.length){
     html+=divider(`Pihak Luar (${luar.length})`,'teal');
