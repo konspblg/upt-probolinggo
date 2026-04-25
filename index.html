@@ -15,7 +15,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .topbar{background:#1A1A2E;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));position:fixed;top:0;left:0;right:0;z-index:200}
 .topbar h1{color:#fff;font-size:15px;font-weight:600}
 .topbar p{color:rgba(255,255,255,0.5);font-size:11px;margin-top:3px}
-.scroll-wrap{position:fixed;top:0;left:0;right:0;bottom:62px;overflow-y:auto;background:#F0F4FF;padding-top:62px}
+.scroll-wrap{position:fixed;top:0;left:0;right:0;bottom:62px;overflow-y:auto;background:#F0F4FF}
 .content{padding:12px;min-height:100%}
 .panel{display:none}
 .panel.active{display:block}
@@ -84,11 +84,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .card-footer-left{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 
 .filter-bar{background:#fff;border-bottom:1px solid #E8EEF8;padding:10px 12px;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto}
-.filter-select,.filter-date{font-size:12px;font-weight:500;color:#1565C0;border:1.5px solid #90CAF9;border-radius:8px;padding:0 8px;background:#EEF4FF;appearance:none;-webkit-appearance:none;outline:none;min-width:0;flex:1;height:34px}
+.filter-select,.filter-date{font-size:12px;font-weight:500;color:#1565C0;border:1.5px solid #90CAF9;border-radius:8px;padding:0 8px;background:#EEF4FF;appearance:none;-webkit-appearance:none;outline:none;min-width:0;flex:1;height:34px;cursor:pointer}
 .filter-select.active,.filter-date.active{background:#1565C0;color:#fff;border-color:#1565C0}
-.filter-date::-webkit-datetime-edit-text,.filter-date::-webkit-datetime-edit-month-field,.filter-date::-webkit-datetime-edit-day-field,.filter-date::-webkit-datetime-edit-year-field{color:#1565C0}
-.filter-date.active::-webkit-datetime-edit-text,.filter-date.active::-webkit-datetime-edit-month-field,.filter-date.active::-webkit-datetime-edit-day-field,.filter-date.active::-webkit-datetime-edit-year-field{color:#fff}
-.filter-date-wrap{flex:1;min-width:0;position:relative}
+.filter-date::-webkit-datetime-edit{color:#1565C0}
+.filter-date::-webkit-datetime-edit-fields-wrapper{background:transparent}
+.filter-date.active::-webkit-datetime-edit{color:#fff}
+.filter-date::-webkit-calendar-picker-indicator{cursor:pointer;opacity:0.6}
+.filter-date.active::-webkit-calendar-picker-indicator{filter:invert(1)}
 .filter-clear{font-size:12px;font-weight:600;color:#fff;background:#E53935;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .filter-clear:disabled{background:#E0E0E0;color:#aaa;cursor:default}
 .fab-up{position:fixed;bottom:72px;right:12px;width:30px;height:30px;background:#1565C0;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:199;opacity:0;transition:opacity 0.25s;box-shadow:0 2px 6px rgba(21,101,192,0.4)}
@@ -113,7 +115,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
           <option value="BANGIL">Bangil</option>
           <option value="JEMBER">Jember</option>
         </select>
-        <div style="flex:1;min-width:0;position:relative;height:34px"><input type="date" class="filter-date" id="romFilterDate" onchange="applyRomFilter()" style="width:100%;height:34px;position:absolute;opacity:0.01"><div id="romDateLabel" onclick="document.getElementById('romFilterDate').showPicker&&document.getElementById('romFilterDate').showPicker()" style="position:absolute;inset:0;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:500;color:#1565C0;background:#EEF4FF;border:1.5px solid #90CAF9;border-radius:8px;pointer-events:none;white-space:nowrap;overflow:hidden" id="romDateDisplay">Pilih Tanggal</div></div>
+        <input type="date" class="filter-date" id="romFilterDate" onchange="applyRomFilter()">
         <button class="filter-clear" id="romClearBtn" onclick="clearRomFilter()" disabled>Hapus</button>
       </div>
       <div id="romContent"><div class="loading">Memuat data</div></div>
@@ -137,7 +139,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
           <option value="BANGIL">Bangil</option>
           <option value="JEMBER">Jember</option>
         </select>
-        <div style="flex:1;min-width:0;position:relative;height:34px"><input type="date" class="filter-date" id="robFilterDate" onchange="applyRobFilter()" style="width:100%;height:34px;position:absolute;opacity:0.01"><div id="robDateLabel" onclick="document.getElementById('robFilterDate').showPicker&&document.getElementById('robFilterDate').showPicker()" style="position:absolute;inset:0;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:500;color:#1565C0;background:#EEF4FF;border:1.5px solid #90CAF9;border-radius:8px;pointer-events:none;white-space:nowrap;overflow:hidden" id="robDateDisplay">Pilih Tanggal</div></div>
+        <input type="date" class="filter-date" id="robFilterDate" onchange="applyRobFilter()">
         <button class="filter-clear" id="robClearBtn" onclick="clearRobFilter()" disabled>Hapus</button>
       </div>
       <div style="padding:12px 0 0" id="monthContent"><div class="loading">Memuat data</div></div>
@@ -158,6 +160,17 @@ const DAYS=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 const MONTHS_ID=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const MN={Januari:0,Februari:1,Maret:2,April:3,Mei:4,Juni:5,Juli:6,Agustus:7,September:8,Oktober:9,November:10,Desember:11};
 const NOW=new Date();
+
+// Set posisi scroll-wrap tepat di bawah header
+function fixScrollWrap(){
+  const h=document.querySelector('.topbar').offsetHeight;
+  const sw=document.getElementById('scrollWrap');
+  sw.style.top=h+'px';
+  sw.style.paddingTop='0';
+}
+fixScrollWrap();
+window.addEventListener('resize', fixScrollWrap);
+
 const TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
 const TOMORROW=new Date(TODAY); TOMORROW.setDate(TODAY.getDate()+1);
 document.getElementById('tgl').textContent='Jadwal Vendor · Hari ini: '+DAYS[TODAY.getDay()]+', '+TODAY.getDate()+' '+MONTHS_ID[TODAY.getMonth()]+' '+TODAY.getFullYear();
@@ -299,11 +312,8 @@ function applyRomFilter(){
   const hasFilter=ultg||dateVal;
   clearBtn.disabled=!hasFilter;
   document.getElementById('romFilterUltg').classList.toggle('active',!!ultg);
-  const romLbl=document.getElementById('romDateDisplay');
-  if(romLbl){
-    if(dateVal){const[y,mo,d]=dateVal.split('-');romLbl.textContent=d+'/'+mo+'/'+y;romLbl.style.background='#1565C0';romLbl.style.color='#fff';romLbl.style.borderColor='#1565C0';}
-    else{romLbl.textContent='Pilih Tanggal';romLbl.style.background='#EEF4FF';romLbl.style.color='#1565C0';romLbl.style.borderColor='#90CAF9';}
-  }
+  const romDate=document.getElementById('romFilterDate');
+  if(romDate){romDate.classList.toggle('active',!!dateVal);}
 
   const content=document.getElementById('romContent');
   document.getElementById('c2').textContent=filtered.length;
@@ -397,11 +407,8 @@ function applyRobFilter(){
   const hasFilter=ultg||dateVal;
   clearBtn.disabled=!hasFilter;
   document.getElementById('robFilterUltg').classList.toggle('active',!!ultg);
-  const robLbl=document.getElementById('robDateDisplay');
-  if(robLbl){
-    if(dateVal){const[y,mo,d]=dateVal.split('-');robLbl.textContent=d+'/'+mo+'/'+y;robLbl.style.background='#1565C0';robLbl.style.color='#fff';robLbl.style.borderColor='#1565C0';}
-    else{robLbl.textContent='Pilih Tanggal';robLbl.style.background='#EEF4FF';robLbl.style.color='#1565C0';robLbl.style.borderColor='#90CAF9';}
-  }
+  const robDate=document.getElementById('robFilterDate');
+  if(robDate){robDate.classList.toggle('active',!!dateVal);}
 
   document.getElementById('c3').textContent=filtered.length;
   const content=document.getElementById('monthContent');
