@@ -21,7 +21,7 @@ Ganti `XXXXXXXX` dengan **gid** dari sheet bulan Juni pada source spreadsheet.
 ---
 
 ## 3. Update di dropdown `monthSelect`
-Tambahkan 1 baris setelah opsi bulan Mei:
+Tambahkan 1 baris setelah opsi bulan Mei (mengikuti penambahan ROB):
 (cari pada sekitar baris 200)
 
 ```html
