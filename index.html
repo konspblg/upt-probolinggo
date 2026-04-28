@@ -135,6 +135,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
         <option value="3">Maret 2026</option>
         <option value="4">April 2026</option>
         <option value="5" selected>Mei 2026</option>
+        <option value="6">Mei 2026</option>
       </select>
       <span class="month-count" id="monthCount"></span>
     </div>
@@ -202,6 +203,7 @@ const URLS={
   3:BASE+'?gid=1823378795&single=true&output=csv',
   4:BASE+'?gid=1580327448&single=true&output=csv',
   5:BASE+'?gid=283699977&single=true&output=csv',
+  6:BASE+'?gid=2058835488&single=true&output=csv',
 };
 function parseCSV(text){
   const rows=[];const lines=text.split('\n');let i=0;
