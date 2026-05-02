@@ -17,18 +17,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .topbar h1{color:#fff;font-size:15px;font-weight:600}
 .topbar p{color:rgba(255,255,255,0.5);font-size:11px;margin-top:3px}
 
-/* Search pill di dalam header */
-.header-search-pill{display:flex;align-items:center;background:rgba(255,255,255,0.12);border-radius:20px;overflow:hidden;width:32px;height:32px;transition:width 0.3s cubic-bezier(0.4,0,0.2,1);flex-shrink:0}
-.header-search-pill.open{width:200px;background:rgba(255,255,255,0.18)}
-.header-search-icon{width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent}
-.header-search-icon svg{width:15px;height:15px;fill:rgba(255,255,255,0.85)}
-.header-search-input{flex:1;border:none;background:transparent;color:#fff;font-size:13px;outline:none;padding:0;min-width:0;opacity:0;transition:opacity 0.2s}
-.header-search-pill.open .header-search-input{opacity:1}
-.header-search-input::placeholder{color:rgba(255,255,255,0.45)}
-.header-search-count{font-size:10px;color:rgba(255,255,255,0.55);white-space:nowrap;padding-right:6px;flex-shrink:0;opacity:0;transition:opacity 0.2s}
-.header-search-pill.open .header-search-count{opacity:1}
-.header-search-close{width:24px;height:24px;flex-shrink:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.15);border:none;border-radius:50%;cursor:pointer;margin-right:5px;color:#fff;font-size:12px;line-height:1}
-.header-search-pill.open .header-search-close{display:flex}
+/* Search row di bawah header */
+.topbar-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.topbar-search-row{overflow:hidden;max-height:0;transition:max-height 0.25s ease,padding 0.25s ease;padding:0 0}
+.topbar-search-row.open{max-height:52px;padding:8px 0 2px}
+.topbar-search-inner{display:flex;align-items:center;background:rgba(255,255,255,0.13);border-radius:10px;padding:0 10px;gap:6px}
+.topbar-search-inner svg{width:14px;height:14px;fill:rgba(255,255,255,0.6);flex-shrink:0}
+.topbar-search-input{flex:1;border:none;background:transparent;color:#fff;font-size:13px;outline:none;padding:9px 0}
+.topbar-search-input::placeholder{color:rgba(255,255,255,0.4)}
+.topbar-search-count{font-size:11px;color:rgba(255,255,255,0.5);white-space:nowrap;flex-shrink:0}
+.topbar-search-close{background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:22px;height:22px;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;line-height:1}
+
+/* Icon search di header */
+.header-search-icon{background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;opacity:0.8}
+.header-search-icon svg{width:17px;height:17px;fill:#fff}
+.header-search-icon.active{opacity:1}
 .sticky-area{position:fixed;left:0;right:0;z-index:50;background:#fff}
 .scroll-area{position:fixed;left:0;right:0;bottom:62px;overflow-y:auto;background:#F0F4FF}
 .content{padding:12px 25px;min-height:100%}
@@ -125,18 +128,23 @@ mark.hl{background:#FFD600;color:#1A1A2E;border-radius:2px;padding:0 1px}
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="topbar-text">
-    <h1>UPT Probolinggo</h1>
-    <p id="tgl"></p>
-  </div>
-  <div class="header-search-pill" id="fabSearchPill">
-    <button class="header-search-icon" onclick="toggleSearch()">
+<div class="topbar" id="topbar">
+  <div class="topbar-row">
+    <div class="topbar-text">
+      <h1>UPT Probolinggo</h1>
+      <p id="tgl"></p>
+    </div>
+    <button class="header-search-icon" id="searchToggleBtn" onclick="toggleSearch()">
       <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
     </button>
-    <input class="header-search-input" id="searchInput" type="text" placeholder="Cari…" autocomplete="off" oninput="onSearch(this.value)">
-    <span class="header-search-count" id="searchCount"></span>
-    <button class="header-search-close" onclick="closeSearch()">✕</button>
+  </div>
+  <div class="topbar-search-row" id="searchRow">
+    <div class="topbar-search-inner">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input class="topbar-search-input" id="searchInput" type="text" placeholder="Cari aset, uraian, peralatan…" autocomplete="off" oninput="onSearch(this.value)">
+      <span class="topbar-search-count" id="searchCount"></span>
+      <button class="topbar-search-close" onclick="closeSearch()">✕</button>
+    </div>
   </div>
 </div>
 <div class="sticky-area" id="stickyArea">
@@ -525,21 +533,22 @@ document.getElementById('scrollWrap').addEventListener('scroll',function(){
 // ---- FLOATING SEARCH (pill expand) ----
 let lastQuery='';
 function toggleSearch(){
-  const pill=document.getElementById('fabSearchPill');
-  if(pill.classList.contains('open')){ closeSearch(); } else { openSearch(); }
+  const row=document.getElementById('searchRow');
+  if(row.classList.contains('open')){ closeSearch(); } else { openSearch(); }
 }
 function openSearch(){
-  const pill=document.getElementById('fabSearchPill');
-  pill.classList.add('open');
-  setTimeout(()=>document.getElementById('searchInput').focus(),300);
+  document.getElementById('searchRow').classList.add('open');
+  document.getElementById('searchToggleBtn').classList.add('active');
+  setTimeout(()=>{ document.getElementById('searchInput').focus(); fixLayout(); }, 50);
 }
 function closeSearch(){
-  const pill=document.getElementById('fabSearchPill');
-  pill.classList.remove('open');
+  document.getElementById('searchRow').classList.remove('open');
+  document.getElementById('searchToggleBtn').classList.remove('active');
   document.getElementById('searchInput').value='';
   document.getElementById('searchCount').textContent='';
   lastQuery='';
   clearHighlights();
+  setTimeout(fixLayout, 50);
 }
 function onSearch(q){
   q=q.trim();
