@@ -354,40 +354,37 @@ function cardHTML(r,hl,showPj){
   </div>`;
 }
 function esc(s){return (s||'').replace(/'/g,"\\'")}
-function cardHTMLRom(r,hl,idx){
+function cardHTMLRom(r,hl,romIdx){
   const awal=r[7]||'',akhir=r[8]||'';
   const pj=r[6]||'';
   const mitigasi=r[11]||'';
   const isPihakLuar=(r[6]||'').toUpperCase().includes('PIHAK LUAR');
-  const badge=hl?'<span class="today-badge">Berlangsung Hari Ini</span>':''
-  const st = (typeof getStatusStore==='function' && isPihakLuar) ? getStatusForRow(r) : null;
-  const statusRow = st ? buildStatusRow(st) : '';
-  const anyFilled = st && (st.ik||st.pembahasan||st.wp||st.pra);
-  const btnInput = isPihakLuar ? `<button class="btn-input${anyFilled?' filled':''}" onclick="openInputModal(${idx})">${anyFilled?'✓ Status':'+ Status'}</button>` : '';
-  return`<div class="card${hl?' highlight':''}" data-rom-idx="${idx}">
-    <div class="card-top"><div class="aset">${r[1]||''}</div><span class="teg ${tegClass(r[3])}">${r[3]||''} kV</span></div>
-    <div class="uraian">${r[2]||''}</div>
-    <div class="meta">
-      <div class="mi"><div class="ml">Peralatan Padam</div><div class="mv">${r[4]||''}</div></div>
-      <div class="mi"><div class="ml">Pukul</div><div class="mv">${r[9]||''}</div></div>
-      <div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">${awal.replace(/^[^,]+,\s*/,'')}</div></div>
-      <div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">${akhir.replace(/^[^,]+,\s*/,'')}</div></div>
-    </div>
-    ${statusRow}
-    <div class="card-footer">
-      <div class="card-footer-left">
-        <span class="ultg ${ultgClass(r[13])}">${r[13]||'—'}</span>
-        ${pj?`<span class="pj-badge ${pjClass(pj)}">${pj}</span>`:''}
-        ${badge}
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        ${btnInput}
-        <button class="btn-mitigasi${mitigasi?'':' empty'}" onclick="${mitigasi?`showMitigasi('${esc(r[1])}','${esc(mitigasi)}')`:'\`'}" ${mitigasi?'':' disabled'}>?</button>
-      </div>
-    </div>
-  </div>`;
+  const badge=hl?'<span class="today-badge">Berlangsung Hari Ini</span>':'';
+  const st=(typeof getStatusStore==='function'&&isPihakLuar)?getStatusForRow(r):null;
+  const statusRow=st?buildStatusRow(st):'';
+  const anyFilled=st&&(st.ik||st.pembahasan||st.wp||st.pra);
+  const btnInput=isPihakLuar?'<button class="btn-input'+(anyFilled?' filled':'')+'" onclick="openInputModal('+romIdx+')">'+(anyFilled?'✓ Status':'+ Status')+'</button>':'';
+  const mitigasiBtn='<button class="btn-mitigasi'+(mitigasi?'':' empty')+'"'+(mitigasi?' onclick="showMitigasi(\''+esc(r[1])+'\',\''+esc(mitigasi)+'\')"':' disabled')+'>?</button>';
+  return '<div class="card'+(hl?' highlight':'')+'" data-rom-idx="'+romIdx+'">'
+    +'<div class="card-top"><div class="aset">'+(r[1]||'')+'</div><span class="teg '+tegClass(r[3])+'">'+(r[3]||'')+' kV</span></div>'
+    +'<div class="uraian">'+(r[2]||'')+'</div>'
+    +'<div class="meta">'
+    +'<div class="mi"><div class="ml">Peralatan Padam</div><div class="mv">'+(r[4]||'')+'</div></div>'
+    +'<div class="mi"><div class="ml">Pukul</div><div class="mv">'+(r[9]||'')+'</div></div>'
+    +'<div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">'+awal.replace(/^[^,]+,\s*/,'')+'</div></div>'
+    +'<div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">'+akhir.replace(/^[^,]+,\s*/,'')+'</div></div>'
+    +'</div>'
+    +statusRow
+    +'<div class="card-footer">'
+    +'<div class="card-footer-left">'
+    +'<span class="ultg '+ultgClass(r[13])+'">'+(r[13]||'—')+'</span>'
+    +(pj?'<span class="pj-badge '+pjClass(pj)+'">'+pj+'</span>':'')
+    +badge
+    +'</div>'
+    +'<div style="display:flex;gap:6px;align-items:center">'+btnInput+mitigasiBtn+'</div>'
+    +'</div>'
+    +'</div>';
 }
-let romAllRows=[];
 
 function renderRomPanel(rows){
   romAllRows=rows;
@@ -720,41 +717,33 @@ function showToast(msg){
 
 // ── SALIN DATA PIHAK LUAR ─────────────────────────────────────────
 function salinPihakLuar(){
-  const store = getStatusStore();
-  const luar = romAllRows.filter(r=>(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
-  if(!luar.length){ showToast('Tidak ada data Pihak Luar'); return; }
-
-  const lines = luar.map((r,i)=>{
-    const st = store[getStatusKey(r)] || {ik:false,pembahasan:false,wp:false,pra:false};
-    const chk = v => v ? '✅' : '❌';
-    // Kolom: A=r[0], B=r[1], C=r[2], E=r[4], H=r[7], I=r[8], J=r[9]
-    return [
-      `${i+1}. ${r[1]||''}`,
-      `${r[2]||''}`,
-      `${r[4]||''}`,
-      `Awal: ${(r[7]||'').replace(/^[^,]+,\s*/,'')}`,
-      `Akhir: ${(r[8]||'').replace(/^[^,]+,\s*/,'')}`,
-      `Pukul: ${r[9]||''}`,
-      `Status IK: ${chk(st.ik)}`,
-      `Status Pembahasan: ${chk(st.pembahasan)}`,
-      `Status WP: ${chk(st.wp)}`,
-      `Prapekerjaan: ${chk(st.pra)}`,
-    ].join('
-');
-  }).join('
-
-');
-
-  navigator.clipboard.writeText(lines).then(()=>{
-    const btn = document.getElementById('btnSalin');
-    if(btn){ btn.classList.add('copied'); btn.innerHTML=`<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Tersalin!`; setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML=salinBtnInner();},2500); }
+  const store=getStatusStore();
+  const luar=romAllRows.filter(r=>(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
+  if(!luar.length){showToast('Tidak ada data Pihak Luar');return;}
+  const nl='\n';
+  const lines=luar.map(function(r,i){
+    const st=store[getStatusKey(r)]||{ik:false,pembahasan:false,wp:false,pra:false};
+    const chk=function(v){return v?'\u2705':'\u274C';};
+    return (i+1)+'. '+(r[1]||'')+nl
+      +(r[2]||'')+nl
+      +(r[4]||'')+nl
+      +'Awal: '+((r[7]||'').replace(/^[^,]+,\s*/,''))+nl
+      +'Akhir: '+((r[8]||'').replace(/^[^,]+,\s*/,''))+nl
+      +'Pukul: '+(r[9]||'')+nl
+      +'Status IK: '+chk(st.ik)+nl
+      +'Status Pembahasan: '+chk(st.pembahasan)+nl
+      +'Status WP: '+chk(st.wp)+nl
+      +'Prapekerjaan: '+chk(st.pra);
+  }).join(nl+nl);
+  navigator.clipboard.writeText(lines).then(function(){
+    const btn=document.getElementById('btnSalin');
+    if(btn){btn.classList.add('copied');btn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Tersalin!';setTimeout(function(){btn.classList.remove('copied');btn.innerHTML=salinBtnInner();},2500);}
     showToast('Data Pihak Luar berhasil disalin');
-  }).catch(()=>{
-    // Fallback untuk browser yang tidak support clipboard API
-    const ta = document.createElement('textarea');
-    ta.value = lines; ta.style.position='fixed'; ta.style.opacity='0';
-    document.body.appendChild(ta); ta.focus(); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
+  }).catch(function(){
+    const ta=document.createElement('textarea');
+    ta.value=lines;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
     showToast('Data berhasil disalin');
   });
 }
