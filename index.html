@@ -143,10 +143,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .btn-input.filled{border-color:#00897B}
 
 /* ── TOMBOL SALIN ───────────────────────────────────── */
-.btn-salin{display:flex;align-items:center;gap:7px;background:#fff;border:1.5px solid #1565C0;border-radius:10px;color:#1565C0;font-size:12px;font-weight:600;padding:8px 14px;cursor:pointer;margin:0 0 4px 0;transition:all 0.15s;width:100%}
-.btn-salin:active{background:#EEF4FF}
+.salin-wrap{margin:4px 0 8px;position:relative}
+.btn-salin{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#1565C0 0%,#0D47A1 100%);border:none;border-radius:12px;color:#fff;font-size:12px;font-weight:600;padding:11px 16px;cursor:pointer;width:100%;transition:all 0.2s;box-shadow:0 4px 12px rgba(21,101,192,0.3);letter-spacing:0.3px}
+.btn-salin:active{transform:scale(0.98);box-shadow:0 2px 6px rgba(21,101,192,0.2)}
 .btn-salin svg{width:15px;height:15px;flex-shrink:0}
-.btn-salin.copied{background:#1565C0;color:#fff;border-color:#1565C0}
+.btn-salin.copied{background:linear-gradient(135deg,#00897B 0%,#00695C 100%);box-shadow:0 4px 12px rgba(0,137,123,0.35)}
 
 /* ── TOAST notifikasi ───────────────────────────────── */
 .toast{position:fixed;bottom:calc(62px + 16px);left:50%;transform:translateX(-50%) translateY(20px);background:#1A1A2E;color:#fff;font-size:12px;font-weight:500;padding:10px 20px;border-radius:24px;z-index:500;opacity:0;transition:all 0.3s;white-space:nowrap;pointer-events:none}
@@ -433,7 +434,7 @@ function applyRomFilter(){
 
   let html='<div style="padding:12px 12px 0">';
   if(luar.length){
-    html+='<button class="btn-salin" id="btnSalin" onclick="salinPihakLuar()">'+salinBtnInner()+'</button>';
+    html+='<div class="salin-wrap"><button class="btn-salin" id="btnSalin" onclick="salinPihakLuar()">'+salinBtnInner()+'</button></div>';
     html+=divider('Pihak Luar ('+luar.length+')','teal');
     if(luarHlWithIdx.length) html+=luarHlWithIdx.map(function(x){return cardHTMLRom(x.r,true,x.idx);}).join('');
     html+=luarRestWithIdx.map(function(x){return cardHTMLRom(x.r,false,x.idx);}).join('');
@@ -739,7 +740,7 @@ function salinPihakLuar(){
   }).join(nl+nl);
   navigator.clipboard.writeText(lines).then(function(){
     const btn=document.getElementById('btnSalin');
-    if(btn){btn.classList.add('copied');btn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Tersalin!';setTimeout(function(){btn.classList.remove('copied');btn.innerHTML=salinBtnInner();},2500);}
+    if(btn){btn.classList.add('copied');btn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Berhasil Disalin! ✓';setTimeout(function(){btn.classList.remove('copied');btn.innerHTML=salinBtnInner();},2500);}
     showToast('Data Pihak Luar berhasil disalin');
   }).catch(function(){
     const ta=document.createElement('textarea');
@@ -751,7 +752,7 @@ function salinPihakLuar(){
 }
 
 function salinBtnInner(){
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Salin Data Pihak Luar`;
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Salin Semua Pihak Luar';
 }
 
 function sw(i){
