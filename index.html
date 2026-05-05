@@ -399,13 +399,9 @@ function applyRomFilter(){
   let filtered=romAllRows;
   if(ultg) filtered=filtered.filter(r=>(r[13]||'').toUpperCase().includes(ultg));
   if(dateVal){
-    // dateVal = "2026-04-17", konversi ke object Date
     const [y,m,d]=dateVal.split('-');
     const target=new Date(parseInt(y),parseInt(m)-1,parseInt(d));
-    filtered=filtered.filter(r=>{
-      const d1=parseDate(r[7]);
-      return d1&&d1.getTime()===target.getTime();
-    });
+    filtered=filtered.filter(r=>{const d1=parseDate(r[7]);return d1&&d1.getTime()===target.getTime();});
   }
 
   const hasFilter=ultg||dateVal;
@@ -414,34 +410,40 @@ function applyRomFilter(){
   const romDate=document.getElementById('romFilterDate');
   if(romDate){
     romDate.classList.toggle('active',!!dateVal);
-    romDate.setAttribute('data-has-value', dateVal?'1':'');
-    const rp=document.getElementById('romDatePlaceholder'); if(rp) rp.style.display=dateVal?'none':'';
+    romDate.setAttribute('data-has-value',dateVal?'1':'');
+    const rp=document.getElementById('romDatePlaceholder');if(rp) rp.style.display=dateVal?'none':'';
   }
 
-  const content=document.getElementById('romContent');
+  const contentEl=document.getElementById('romContent');
   document.getElementById('c2').textContent=filtered.length;
 
   if(!filtered.length){
-    content.innerHTML='<div class="empty" style="margin:12px">Tidak ada data sesuai filter</div>';
+    contentEl.innerHTML='<div class="empty" style="margin:12px">Tidak ada data sesuai filter</div>';
     return;
   }
 
   const luar=filtered.filter(r=>(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
   const bukan=filtered.filter(r=>!(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
-  const luarHl=luar.filter(r=>isActive(r[7],r[8],TODAY));
-  const luarRest=luar.filter(r=>!isActive(r[7],r[8],TODAY));
+
+  // map ke index global romAllRows agar openInputModal bisa temukan row
+  const luarWithIdx=luar.map(r=>({r,idx:romAllRows.indexOf(r)}));
+  const bukanWithIdx=bukan.map(r=>({r,idx:romAllRows.indexOf(r)}));
+  const luarHlWithIdx=luarWithIdx.filter(x=>isActive(x.r[7],x.r[8],TODAY));
+  const luarRestWithIdx=luarWithIdx.filter(x=>!isActive(x.r[7],x.r[8],TODAY));
+
   let html='<div style="padding:12px 12px 0">';
   if(luar.length){
-    html+=divider(`Pihak Luar (${luar.length})`,'teal');
-    if(luarHlWithIdx.length) html+=luarHlWithIdx.map(x=>cardHTMLRom(x.r,true,x.idx)).join('');
-    html+=luarRestWithIdx.map(x=>cardHTMLRom(x.r,false,x.idx)).join('');
+    html+='<button class="btn-salin" id="btnSalin" onclick="salinPihakLuar()">'+salinBtnInner()+'</button>';
+    html+=divider('Pihak Luar ('+luar.length+')','teal');
+    if(luarHlWithIdx.length) html+=luarHlWithIdx.map(function(x){return cardHTMLRom(x.r,true,x.idx);}).join('');
+    html+=luarRestWithIdx.map(function(x){return cardHTMLRom(x.r,false,x.idx);}).join('');
   }
   if(bukan.length){
-    html+=divider(`Lainnya (${bukan.length})`,'gray');
-    html+=bukanWithIdx.map(x=>cardHTMLRom(x.r,false,x.idx)).join('');
+    html+=divider('Lainnya ('+bukan.length+')','gray');
+    html+=bukanWithIdx.map(function(x){return cardHTMLRom(x.r,false,x.idx);}).join('');
   }
   html+='</div>';
-  content.innerHTML=html;
+  contentEl.innerHTML=html;
 }
 
 function clearRomFilter(){
