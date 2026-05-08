@@ -206,9 +206,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
     <h1>UPT Probolinggo</h1>
     <p id="tgl"></p>
   </div>
-  <button class="search-toggle-btn" id="searchToggleBtn" onclick="toggleSearch()" aria-label="Cari">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-  </button>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button id="btnSync" onclick="syncToTempStore()" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;cursor:pointer;white-space:nowrap;">Sync</button>
+    <button class="search-toggle-btn" id="searchToggleBtn" onclick="toggleSearch()" aria-label="Cari">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+    </button>
+  </div>
 </div>
 <div class="sticky-area" id="stickyArea">
   <!-- ROM Final sticky bars -->
@@ -365,34 +368,17 @@ function divider(label, style){
 function cardHTML(r,hl,showPj){
   var awal=r[4]||'',akhir=r[5]||'';
   var badge=hl?'<span class="today-badge">Berlangsung Hari Ini</span>':'';
+  // Status — selalu tampilkan karena semua row di tab ini adalah PIHAK LUAR
   var st=getStatusForHari(r);
-  var statusRow=st?buildStatusRow(st):'';
-  var mitigasiBtn;
-  if(r[7]){
-    mitigasiBtn='<button class="btn-mitigasi" onclick="showMitigasi(\''+esc(r[0])+'\',\''+esc(r[7])+'\')">?</button>';
-  } else {
-    mitigasiBtn='<button class="btn-mitigasi empty" disabled>?</button>';
-  }
-  return '<div class="card'+(hl?' highlight':'')+'">'
-    +'<div class="card-top"><div class="aset">'+(r[0]||'')+'</div><span class="teg '+tegClass(r[2])+'">'+(r[2]||'')+' kV</span></div>'
-    +'<div class="uraian">'+(r[1]||'')+'</div>'
-    +'<div class="meta">'
-    +'<div class="mi"><div class="ml">Peralatan Padam</div><div class="mv">'+(r[3]||'')+'</div></div>'
-    +'<div class="mi"><div class="ml">Pukul</div><div class="mv">'+(r[6]||'')+'</div></div>'
-    +'<div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">'+awal.replace(/^[^,]+,\s*/,'')+'</div></div>'
-    +'<div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">'+akhir.replace(/^[^,]+,\s*/,'')+'</div></div>'
-    +'</div>'
-    +statusRow
-    +'<div class="card-footer">'
-    +'<div class="card-footer-left">'
-    +'<span class="ultg '+ultgClass(r[7])+'">'+(r[7]||'&#8212;')+'</span>'
-    +badge
-    +'</div>'
-    +mitigasiBtn
-    +'</div>'
-    +'</div>';
+  var allFilled=st&&st.ik&&st.pembahasan&&st.wp&&st.pra;
+  var statusRow=buildStatusRow(st||{ik:false,pembahasan:false,wp:false,pra:false});
+  var editIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+  var checkIcon='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+  var btnInput='<button class="btn-input'+(allFilled?' filled':'')+'" onclick="openInputModalHari(this)">'+(allFilled?checkIcon+' Lengkap':editIcon+' Status')+'</button>';
+  var mitigasi=r[8]||'';
+  var mitigasiBtn=mitigasi?'<button class="btn-mitigasi" onclick="showMitigasi(\''+esc(r[0])+'\',' +'\'' +esc(mitigasi)+'\'' +')">?</button>':'<button class="btn-mitigasi empty" disabled>?</button>';
+  return '<div class="card'+(hl?' highlight':'')+'" data-aset="'+esc(r[0])+'" data-tglawal="'+esc(awal)+'">'    +'<div class="card-top"><div class="aset">'+(r[0]||'')+'</div><span class="teg '+tegClass(r[2])+'">'+( r[2]||'')+' kV</span></div>'    +'<div class="uraian">'+(r[1]||'')+'</div>'    +'<div class="meta">'    +'<div class="mi"><div class="ml">Peralatan Padam</div><div class="mv">'+(r[3]||'')+'</div></div>'    +'<div class="mi"><div class="ml">Pukul</div><div class="mv">'+(r[6]||'')+'</div></div>'    +'<div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">'+awal.replace(/^[^,]+,\s*/,'')+'</div></div>'    +'<div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">'+akhir.replace(/^[^,]+,\s*/,'')+'</div></div>'    +'</div>'    +statusRow    +'<div class="card-footer">'    +'<div class="card-footer-left">'    +'<span class="ultg '+ultgClass(r[7])+'">'+(r[7]||'&#8212;')+'</span>'    +badge    +'</div>'    +'<div style="display:flex;gap:6px;align-items:center;">'+btnInput+mitigasiBtn+'</div>'    +'</div>'    +'</div>';
 }
-
 function esc(s){return (s||'').replace(/'/g,"\\'")}
 function cardHTMLRom(r,hl,romIdx){
   const awal=r[7]||'',akhir=r[8]||'';
@@ -580,11 +566,10 @@ async function loadAll(){
   try{
     const romData=await fetchCSV(URLS.rom);
     const romRows=romData.slice(4).filter(r=>r[0]&&/^\d+$/.test(r[0].trim())&&r[1]&&r[1].trim()!='');
-    // Ambil hanya PIHAK LUAR dari ROM_Final, remap ke format cardHTML
-    // ROM_Final cols: 0=NO,1=ASET,2=URAIAN,3=TEG,4=PERALATAN,5=SIFAT,6=PJ,7=TGL_AWAL,8=TGL_AKHIR,9=PUKUL,10=ROX,11=MITIGASI,12=NOTIF,13=ULTG,14=ST_IK,15=ST_PEMB,16=ST_WP,17=PRAPEK
-    // cardHTML cols: 0=ASET,1=URAIAN,2=TEG,3=PERALATAN,4=TGL_AWAL,5=TGL_AKHIR,6=PUKUL,7=ULTG,8=ST_IK,9=ST_PEMB,10=ST_WP,11=PRAPEK
+    // ROM cols: 0=NO,1=ASET,2=URAIAN,3=TEG,4=PERALATAN,5=SIFAT,6=PJ,7=TGL_AWAL,8=TGL_AKHIR,9=PUKUL,10=ROX,11=MITIGASI,12=NOTIF,13=ULTG,14=ST_IK,15=ST_PEMB,16=ST_WP,17=PRAPEK
+    // cardHTML cols: 0=ASET,1=URAIAN,2=TEG,3=PERALATAN,4=TGL_AWAL,5=TGL_AKHIR,6=PUKUL,7=ULTG,8=MITIGASI,9=ST_IK,10=ST_PEMB,11=ST_WP,12=PRAPEK
     const pihakLuar=romRows.filter(r=>(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
-    const remapped=pihakLuar.map(r=>[r[1],r[2],r[3],r[4],r[7],r[8],r[9],r[13],r[14]||'',r[15]||'',r[16]||'',r[17]||'']);
+    const remapped=pihakLuar.map(r=>[r[1],r[2],r[3],r[4],r[7],r[8],r[9],r[13],r[11]||'',r[14]||'',r[15]||'',r[16]||'',r[17]||'']);
     renderPanel('p0',remapped.filter(r=>isActive(r[4],r[5],TODAY)),'Tidak ada pekerjaan hari ini','c0');
     renderPanel('p1',remapped.filter(r=>isActive(r[4],r[5],TOMORROW)),'Tidak ada pekerjaan besok','c1');
     renderRomPanel(romRows);
@@ -697,6 +682,49 @@ function getStatusForHari(r){
 function getStatusForRow(r){
   const store = getStatusStore();
   return store[getStatusKey(r)] || {ik:false, pembahasan:false, wp:false, pra:false};
+}
+// Key untuk tab Hari Ini/Besok: ASET|TGL_AWAL
+function getStatusKeyByAsetTgl(aset,tglawal){
+  return (aset||'')+'|'+(tglawal||'');
+}
+
+function getStatusForHariByKey(aset,tglawal){
+  const store=getStatusStore();
+  // Cari di store ROM (key = NO|ASET|TGL_AWAL) cocok ASET & TGL_AWAL
+  for(const k in store){
+    const p=k.split('|');
+    if(p.length>=3 && p[1]===aset && p[2]===tglawal) return store[k];
+  }
+  // fallback key sederhana
+  return store[getStatusKeyByAsetTgl(aset,tglawal)]||null;
+}
+
+function openInputModalHari(btn){
+  const card=btn.closest('.card');
+  if(!card) return;
+  const aset=card.getAttribute('data-aset')||'';
+  const tglawal=card.getAttribute('data-tglawal')||'';
+  // Cari di romAllRows untuk dapatkan row lengkap
+  const romRow=romAllRows.find(r=>(r[1]||'')==aset&&(r[7]||'')==tglawal);
+  if(romRow){
+    // Pakai openInputModal ROM
+    const idx=romAllRows.indexOf(romRow);
+    openInputModal(idx);
+    return;
+  }
+  // Fallback: buka modal dengan key sederhana
+  currentModalRow=null;
+  currentModalCardEl=card;
+  document.getElementById('modalTitle').textContent=aset||'Input Status';
+  document.getElementById('modalSub').textContent='';
+  const st=getStatusForHariByKey(aset,tglawal)||{ik:false,pembahasan:false,wp:false,pra:false};
+  document.getElementById('chkIK').checked=!!st.ik;
+  document.getElementById('chkPembahasan').checked=!!st.pembahasan;
+  document.getElementById('chkWP').checked=!!st.wp;
+  document.getElementById('chkPra').checked=!!st.pra;
+  // Simpan info di dataset modal untuk save
+  document.getElementById('inputModal').setAttribute('data-hari-key', getStatusKeyByAsetTgl(aset,tglawal));
+  document.getElementById('inputModal').style.display='flex';
 }
 
 // ── MODAL INPUT ───────────────────────────────────────────────────
@@ -845,6 +873,38 @@ function sw(i){
 document.getElementById('scrollWrap').addEventListener('scroll',function(){
   document.getElementById('fabUp').classList.toggle('visible',this.scrollTop>200);
 });
+// ── GAS WEB APP URL (isi setelah deploy) ──────────────────────────
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwpfWKEmE-DVJ3-BOASIcJqBNQqlEi0Sh4x1F79C0wgUjtslc68e-P8zUdzElKSKs7M/exec'; // <-- isi URL Google Apps Script Web App di sini
+
+// ── SYNC KE TEMP_STORE ────────────────────────────────────────────
+async function syncToTempStore(){
+  if(!GAS_URL){showToast('GAS_URL belum diisi!');return;}
+  const btn=document.getElementById('btnSync');
+  btn.disabled=true;btn.textContent='Menyimpan...';
+  try{
+    const store=getStatusStore();
+    const rows=romAllRows.map(r=>{
+      const key=(r[0]||'')+'|'+(r[1]||'')+'|'+(r[7]||'');
+      const st=store[key]||{ik:false,pembahasan:false,wp:false,pra:false};
+      return [
+        r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11],r[12],r[13],
+        st.ik?'OK':'',st.pembahasan?'OK':'',st.wp?'OK':'',st.pra?'OK':''
+      ];
+    });
+    const res=await fetch(GAS_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'syncTempStore',rows:rows})
+    });
+    const json=await res.json();
+    if(json.status==='ok') showToast('Tersimpan ke TEMP_STORE ✓');
+    else showToast('Gagal: '+json.message);
+  }catch(e){
+    showToast('Error: '+e.message);
+  }
+  btn.disabled=false;btn.textContent='Sync';
+}
+
 loadAll();
 </script>
 
