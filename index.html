@@ -33,7 +33,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .search-toggle-btn{background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);border-radius:50%;width:34px;height:34px;min-width:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;transition:all 0.2s;flex-shrink:0;padding:0}
 .search-toggle-btn:active,.search-toggle-btn.active{background:rgba(255,255,255,0.28);border-color:rgba(255,255,255,0.5)}
 .sticky-area{position:fixed;left:0;width:100%;top:56px;z-index:50;background:#fff}
-.scroll-area{position:fixed;left:0;width:100%;top:56px;bottom:62px;overflow-y:auto;background:#F0F4FF}
+.scroll-area{position:fixed;left:0;width:100%;top:112px;bottom:62px;overflow-y:auto;background:#F0F4FF}
 .content{padding:12px;min-height:100%}
 .panel{display:none}
 .panel.active{display:block}
@@ -271,9 +271,10 @@ function fixLayout(){
   sa.style.top=topH+'px';
   sw.style.top=(topH+sa.offsetHeight)+'px';
 }
-requestAnimationFrame(()=>requestAnimationFrame(fixLayout));
-window.addEventListener('resize',fixLayout);
-window.addEventListener("load",fixLayout);
+fixLayout();
+const ro=new ResizeObserver(fixLayout);
+ro.observe(document.querySelector(".topbar"));
+ro.observe(document.getElementById("stickyArea"));
 
 const selMonth=document.getElementById('monthSelect');
 const defaultMonth=Math.min(NOW.getMonth()+2,5);
