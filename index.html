@@ -378,7 +378,7 @@ function cardHari(r){
   const isPihakLuar=pj.toUpperCase().includes('PIHAK LUAR');
   const st={ik:(r[14]||'').trim().toUpperCase()==='OK',pembahasan:(r[15]||'').trim().toUpperCase()==='OK',wp:(r[16]||'').trim().toUpperCase()==='OK',pra:(r[17]||'').trim().toUpperCase()==='OK'};
   const statusRow=isPihakLuar?buildStatusRow(st):'';
-  const mitigasiBtn=mitigasi?'<button class="btn-mitigasi" onclick="showMitigasi(''+esc(aset)+'',''+esc(mitigasi)+'')">?</button>':'<button class="btn-mitigasi empty" disabled>?</button>';
+  const mitigasiBtn=mitigasi?'<button class="btn-mitigasi" onclick="showMitigasi(\''+esc(aset)+'\',\''+esc(mitigasi)+'\')">' +'?'+'</button>':'<button class="btn-mitigasi empty" disabled>?</button>';
   const pjBadge=pj?'<span class="pj-badge '+pjClass(pj)+'">'+pj+'</span>':'';
   return '<div class="card">'
     +'<div class="card-top"><div class="aset">'+aset+'</div><span class="teg '+tegClass(teg)+'">'+teg+' kV</span></div>'
