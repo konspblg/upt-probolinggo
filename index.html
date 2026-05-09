@@ -177,7 +177,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
     <p id="tgl"></p>
   </div>
   <div style="display:flex;gap:8px;align-items:center;">
-    <button id="btnSync" onclick="syncToTempStore()" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;cursor:pointer;white-space:nowrap;">Sync</button>
+    
     <button class="search-toggle-btn" id="searchToggleBtn" onclick="toggleSearch()" aria-label="Cari">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
     </button>
@@ -375,16 +375,9 @@ function cardHari(r){
   const aset=r[1]||'',uraian=r[2]||'',teg=r[3]||'',peralatan=r[4]||'';
   const pj=r[6]||'',awal=r[7]||'',akhir=r[8]||'',pukul=r[9]||'';
   const mitigasi=r[11]||'',ultg=r[13]||'';
-  const isPihakLuar=pj.toUpperCase().includes('PIHAK LUAR');
-  // Cocokkan ke romAllRows untuk ambil/simpan status
-  const romRow=romAllRows.find(rr=>(rr[1]||'')==aset&&(rr[7]||'')==awal);
-  const st=romRow?getRomStatus(romRow):{ik:false,pembahasan:false,wp:false,pra:false};
-  const allFilled=st.ik&&st.pembahasan&&st.wp&&st.pra;
-  const statusRow=isPihakLuar?buildStatusRow(st):'';
-  const btnInput=isPihakLuar?'<button class="btn-input'+(allFilled?' filled':'')+'" onclick="openInputModalHari(this)">'+(allFilled?checkIcon+' Lengkap':editIcon+' Status')+'</button>':'';
-  const mitigasiBtn=mitigasi?'<button class="btn-mitigasi" onclick="showMitigasi(\''+esc(aset)+'\',\''+esc(mitigasi)+'\')">?</button>':'<button class="btn-mitigasi empty" disabled>?</button>';
+  const mitigasiBtn=mitigasi?'<button class="btn-mitigasi" onclick="showMitigasi(\''+esc(aset)+'\',\''+esc(mitigasi)+'\')">' +'?'+'</button>':'<button class="btn-mitigasi empty" disabled>?</button>';
   const pjBadge=pj?'<span class="pj-badge '+pjClass(pj)+'">'+pj+'</span>':'';
-  return '<div class="card" data-aset="'+esc(aset)+'" data-tglawal="'+esc(awal)+'">'
+  return '<div class="card">'
     +'<div class="card-top"><div class="aset">'+aset+'</div><span class="teg '+tegClass(teg)+'">'+teg+' kV</span></div>'
     +'<div class="uraian">'+uraian+'</div>'
     +'<div class="meta">'
@@ -393,10 +386,9 @@ function cardHari(r){
     +'<div class="mi"><div class="ml">Tgl Mulai</div><div class="mv">'+awal.replace(/^[^,]+,\s*/,'')+'</div></div>'
     +'<div class="mi"><div class="ml">Tgl Selesai</div><div class="mv">'+akhir.replace(/^[^,]+,\s*/,'')+'</div></div>'
     +'</div>'
-    +statusRow
     +'<div class="card-footer">'
     +'<div class="card-footer-left"><span class="ultg '+ultgClass(ultg)+'">'+( ultg||'—')+'</span>'+pjBadge+'</div>'
-    +'<div style="display:flex;gap:6px;align-items:center;">'+btnInput+mitigasiBtn+'</div>'
+    +'<div>'+mitigasiBtn+'</div>'
     +'</div></div>';
 }
 
@@ -480,7 +472,7 @@ function applyRomFilter(){
   const bukan=filtered.filter(r=>!(r[6]||'').toUpperCase().includes('PIHAK LUAR'));
   let html='<div style="padding:12px 12px 0">';
   if(luar.length){
-    html+='<div class="salin-wrap"><button class="btn-salin" id="btnSalin" onclick="salinPihakLuar()">'+salinBtnInner()+'</button></div>';
+    html+='<div class="salin-wrap" style="display:flex;gap:8px"><button class="btn-salin" id="btnSalin" onclick="salinPihakLuar()">'+salinBtnInner()+'</button><button id="btnSync" onclick="syncToTempStore()" style="background:linear-gradient(135deg,#00897B,#00695C);border:none;border-radius:12px;color:#fff;font-size:12px;font-weight:600;padding:11px 16px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 12px rgba(0,137,123,0.3)">Sync</button></div>';
     html+=divider('Pihak Luar ('+luar.length+')','teal');
     // Yang berlangsung hari ini di atas + highlight
     const luarHL=luar.filter(r=>isActive(r[7],r[8],TODAY));
@@ -703,7 +695,6 @@ function salinPihakLuar(){
 
 // ── SYNC KE TEMP_STORE ────────────────────────────────────────────
 const GAS_URL=''; // isi URL Google Apps Script Web App di sini
-if(!GAS_URL) document.getElementById('btnSync').style.display='none';
 async function syncToTempStore(){
   if(!GAS_URL){showToast('GAS_URL belum diisi!');return;}
   const btn=document.getElementById('btnSync');btn.disabled=true;btn.textContent='Menyimpan...';
